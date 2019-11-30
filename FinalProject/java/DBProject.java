@@ -27,7 +27,7 @@ import java.io.InputStreamReader;
  * work with PostgreSQL JDBC drivers.
  *
  */
-public class EmbeddedSQL {
+public class DBProject {
 
    // reference to physical database connection.
    private Connection _connection = null;
@@ -38,7 +38,7 @@ public class EmbeddedSQL {
                                 new InputStreamReader(System.in));
 
    /**
-    * Creates a new instance of EmbeddedSQL
+    * Creates a new instance of DBProject
     *
     * @param hostname the MySQL or PostgreSQL server hostname
     * @param database the name of the database
@@ -46,7 +46,7 @@ public class EmbeddedSQL {
     * @param password the user login password
     * @throws java.sql.SQLException when failed to make a connection.
     */
-   public EmbeddedSQL (String dbname, String dbport, String user, String passwd) throws SQLException {
+   public DBProject (String dbname, String dbport, String user, String passwd) throws SQLException {
 
       System.out.print("Connecting to database...");
       try{
@@ -62,7 +62,7 @@ public class EmbeddedSQL {
          System.out.println("Make sure you started postgres on this machine");
          System.exit(-1);
       }//end catch
-   }//end EmbeddedSQL
+   }//end DBProject
 
    /**
     * Method to execute an update SQL statement.  Update SQL instructions
@@ -148,47 +148,65 @@ public class EmbeddedSQL {
          System.err.println (
             "Usage: " +
             "java [-classpath <classpath>] " +
-            EmbeddedSQL.class.getName () +
+            DBProject.class.getName () +
             " <dbname> <port> <user>");
          return;
       }//end if
       
       Greeting();
-      EmbeddedSQL esql = null;
+      DBProject esql = null;
       try{
          // use postgres JDBC driver.
          Class.forName ("org.postgresql.Driver").newInstance ();
-         // instantiate the EmbeddedSQL object and creates a physical
+         // instantiate the DBProject object and creates a physical
          // connection.
          String dbname = args[0];
          String dbport = args[1];
          String user = args[2];
-         esql = new EmbeddedSQL (dbname, dbport, user, "");
+         esql = new DBProject (dbname, dbport, user, "");
 
          boolean keepon = true;
          while(keepon) {
             // These are sample SQL statements
-            System.out.println("MAIN MENU");
-            System.out.println("---------");
-            System.out.println("0. Find the pid of parts with cost lower than $_____ (example)");
-            System.out.println("1. Find the total number of parts supplied by each supplier");
-            System.out.println("2. Find the total number of parts supplied by each supplier who supplies at least 3 parts");
-            System.out.println("3. For every supplier that supplies only green parts, print the name of the supplier and the total number of parts that he supplies");
-            System.out.println("4. For every supplier that supplies green part and red part, print the name and the price of the most expensive part that he supplies"); 
-            System.out.println("5. Find the name of parts with cost lower than $_____");
-            System.out.println("6. Find the address of the suppliers who supply _____________ (pname)");
-            System.out.println("9. < EXIT");
+				System.out.println("MAIN MENU");
+				System.out.println("---------");
+				System.out.println("1. Add new customer");
+				System.out.println("2. Add new room");
+				System.out.println("3. Add new maintenance company");
+				System.out.println("4. Add new repair");
+				System.out.println("5. Add new Booking"); 
+				System.out.println("6. Assign house cleaning staff to a room");
+				System.out.println("7. Raise a repair request");
+				System.out.println("8. Get number of available rooms");
+				System.out.println("9. Get number of booked rooms");
+				System.out.println("10. Get hotel bookings for a week");
+				System.out.println("11. Get top k rooms with highest price for a date range");
+				System.out.println("12. Get top k highest booking price for a customer");
+				System.out.println("13. Get customer total cost occurred for a give date range"); 
+				System.out.println("14. List the repairs made by maintenance company");
+				System.out.println("15. Get top k maintenance companies based on repair count");
+				System.out.println("16. Get number of repairs occurred per year for a given hotel room");
+				System.out.println("17. < EXIT");
 
             switch (readChoice()){
-               case 0: QueryExample(esql); break;
-               case 1: Query1(esql); break;
-               case 2: Query2(esql); break;
-               case 3: Query3(esql); break;
-               case 4: Query4(esql); break;
-               case 5: Query5(esql); break;
-               case 6: Query6(esql); break;
-               case 9: keepon = false; break;
-               default : System.out.println("Unrecognized choice!"); break;
+				   case 1: addCustomer(esql); break;
+				   case 2: addRoom(esql); break;
+				   case 3: addMaintenanceCompany(esql); break;
+				   case 4: addRepair(esql); break;
+				   case 5: bookRoom(esql); break;
+				   case 6: assignHouseCleaningToRoom(esql); break;
+				   case 7: repairRequest(esql); break;
+				   case 8: numberOfAvailableRooms(esql); break;
+				   case 9: numberOfBookedRooms(esql); break;
+				   case 10: listHotelRoomBookingsForAWeek(esql); break;
+				   case 11: topKHighestRoomPriceForADateRange(esql); break;
+				   case 12: topKHighestPriceBookingsForACustomer(esql); break;
+				   case 13: totalCostForCustomer(esql); break;
+				   case 14: listRepairsMade(esql); break;
+				   case 15: topKMaintenanceCompany(esql); break;
+				   case 16: numberOfRepairsForEachRoomPerYear(esql); break;
+				   case 17: keepon = false; break;
+				   default : System.out.println("Unrecognized choice!"); break;
             }//end switch
          }//end while
       }catch(Exception e) {
@@ -234,111 +252,116 @@ public class EmbeddedSQL {
       return input;
    }//end readChoice
 
-   public static void QueryExample(EmbeddedSQL esql){
-      try{
-         String query = "SELECT * FROM Catalog WHERE cost < ";
-         System.out.print("\tEnter cost: $");
-         String input = in.readLine();
-         query += input;
-
-         int rowCount = esql.executeQuery(query);
-         System.out.println ("total row(s): " + rowCount);
-      }catch(Exception e){
-         System.err.println (e.getMessage());
-      }
-   }//end QueryExample
    
-   public static void Query1(EmbeddedSQL esql){
+   public static void addCustomer(DBProject esql){
+	  // Given customer details add the customer in the DB 
       // Your code goes here.
       // ...
       // ...
-      int tempSID;
-      try{
-        String query = "SELECT s.sname, COUNT(c.pid) FROM Suppliers s, Catalog c WHERE c.sid = s.sid GROUP BY s.sname";
-        int rowCount = esql.executeQuery(query);
-        System.out.println("total row(s): " + rowCount);
-      }
-      catch(Exception e)   {
-        System.err.println(e.getMessage());
-      }
-      
-   }//end Query1
+   }//end addCustomer
 
-   public static void Query2(EmbeddedSQL esql){
+   public static void addRoom(DBProject esql){
+	  // Given room details add the room in the DB
       // Your code goes here.
       // ...
       // ...
-      try   {
-            String query = "SELECT s.sname, COUNT(c.pid) AS pCount FROM Suppliers s, Catalog c WHERE s.sid = c.sid GROUP BY s.sname HAVING COUNT(c.pid) > 2";
-            int rowCount = esql.executeQuery(query);
-            System.out.println("total row(s): " + rowCount);
-      }
-      catch(Exception e)    {
-        System.err.println(e.getMessage());
-      }
-   }//end Query2
+   }//end addRoom
 
-   public static void Query3(EmbeddedSQL esql){
+   public static void addMaintenanceCompany(DBProject esql){
+      // Given maintenance Company details add the maintenance company in the DB
+      // ...
+      // ...
+   }//end addMaintenanceCompany
+
+   public static void addRepair(DBProject esql){
+	  // Given repair details add repair in the DB
       // Your code goes here.
       // ...
       // ...
-      try   {
-            String query = "SELECT s.sname, count(*) as numOfParts FROM Suppliers s, Catalog c WHERE s.sid=c.sid AND s.sid IN (SELECT c.sid FROM Catalog c EXCEPT (SELECT c.sid FROM Catalog c WHERE c.pid IN (SELECT p.pid FROM Parts p WHERE p.color != 'Green'))) GROUP BY s.sname";
-            int rowCount = esql.executeQuery(query);
-            System.out.println("total row(s): " + rowCount);
-      }
-      catch(Exception e)    {
-        System.err.println(e.getMessage());
-      }
-   }//end Query3
+   }//end addRepair
 
-   public static void Query4(EmbeddedSQL esql){
+   public static void bookRoom(DBProject esql){
+	  // Given hotelID, roomNo and customer Name create a booking in the DB 
       // Your code goes here.
       // ...
       // ...
-      try   {
-            String query = "SELECT s.sname, MAX(c.cost) as mostExpensivePart FROM Suppliers s, Parts p, Catalog c WHERE s.sid=c.sid AND c.sid IN (SELECT s.sid FROM Suppliers s, Parts p, Catalog c WHERE s.sid=c.sid AND p.pid=c.pid AND p.color = 'Red' INTERSECT (SELECT s.sid FROM Suppliers s, Parts p, Catalog c WHERE s.sid=c.sid AND p.pid=c.pid AND p.color = 'Green')) GROUP BY s.sname";
-            int rowCount = esql.executeQuery(query);
-            System.out.println("total row(s): " + rowCount);
-      }
-      catch(Exception e)    {
-        System.err.println(e.getMessage());
-      }
-   }//end Query4
+   }//end bookRoom
 
-   public static void Query5(EmbeddedSQL esql){
+   public static void assignHouseCleaningToRoom(DBProject esql){
+	  // Given Staff SSN, HotelID, roomNo Assign the staff to the room 
       // Your code goes here.
       // ...
       // ...
-      try{
-         String query = "SELECT p.pname FROM Catalog c, Parts p WHERE p.pid=c.pid AND cost < ";
-         System.out.print("\tEnter cost: $");
-         String input = in.readLine();
-         query += input;
-
-         int rowCount = esql.executeQuery(query);
-         System.out.println ("total row(s): " + rowCount);
-      }catch(Exception e){
-         System.err.println (e.getMessage());
-      }
-   }//end Query5
-
-   public static void Query6(EmbeddedSQL esql){
+   }//end assignHouseCleaningToRoom
+   
+   public static void repairRequest(DBProject esql){
+	  // Given a hotelID, Staff SSN, roomNo, repairID , date create a repair request in the DB
       // Your code goes here.
       // ...
       // ...
-      try{
-         String query = "SELECT s.address FROM Catalog c, Parts p, Suppliers s WHERE p.pid=c.pid AND s.sid=c.sid AND p.pname = '";
-         System.out.print("\tEnter pname: ");
-         String input = in.readLine();
-         query += input;
-         query += "'";
+   }//end repairRequest
+   
+   public static void numberOfAvailableRooms(DBProject esql){
+	  // Given a hotelID, get the count of rooms available 
+      // Your code goes here.
+      // ...
+      // ...
+   }//end numberOfAvailableRooms
+   
+   public static void numberOfBookedRooms(DBProject esql){
+	  // Given a hotelID, get the count of rooms booked
+      // Your code goes here.
+      // ...
+      // ...
+   }//end numberOfBookedRooms
+   
+   public static void listHotelRoomBookingsForAWeek(DBProject esql){
+	  // Given a hotelID, date - list all the rooms available for a week(including the input date) 
+      // Your code goes here.
+      // ...
+      // ...
+   }//end listHotelRoomBookingsForAWeek
+   
+   public static void topKHighestRoomPriceForADateRange(DBProject esql){
+	  // List Top K Rooms with the highest price for a given date range
+      // Your code goes here.
+      // ...
+      // ...
+   }//end topKHighestRoomPriceForADateRange
+   
+   public static void topKHighestPriceBookingsForACustomer(DBProject esql){
+	  // Given a customer Name, List Top K highest booking price for a customer 
+      // Your code goes here.
+      // ...
+      // ...
+   }//end topKHighestPriceBookingsForACustomer
+   
+   public static void totalCostForCustomer(DBProject esql){
+	  // Given a hotelID, customer Name and date range get the total cost incurred by the customer
+      // Your code goes here.
+      // ...
+      // ...
+   }//end totalCostForCustomer
+   
+   public static void listRepairsMade(DBProject esql){
+	  // Given a Maintenance company name list all the repairs along with repairType, hotelID and roomNo
+      // Your code goes here.
+      // ...
+      // ...
+   }//end listRepairsMade
+   
+   public static void topKMaintenanceCompany(DBProject esql){
+	  // List Top K Maintenance Company Names based on total repair count (descending order)
+      // Your code goes here.
+      // ...
+      // ...
+   }//end topKMaintenanceCompany
+   
+   public static void numberOfRepairsForEachRoomPerYear(DBProject esql){
+	  // Given a hotelID, roomNo, get the count of repairs per year
+      // Your code goes here.
+      // ...
+      // ...
+   }//end listRepairsMade
 
-         int rowCount = esql.executeQuery(query);
-         System.out.println ("total row(s): " + rowCount);
-      }catch(Exception e){
-         System.err.println (e.getMessage());
-      }
-   }//end Query6
-
-}//end EmbeddedSQL
+}//end DBProject
