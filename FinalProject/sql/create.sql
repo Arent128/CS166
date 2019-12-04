@@ -149,83 +149,25 @@ FOREIGN KEY(hotelID, roomNo)
 REFERENCES Room(hotelID, roomNo)
 ON DELETE SET DEFAULT; 
 -- data copy				 
-COPY Hotel(	hotelID,			 
-			address,	   
-            manager)
-FROM 'hotel.csv'
-WITH DELIMITER ',';
+\COPY Hotel(hotelID, address, manager) FROM '../data/hotel.csv'WITH DELIMITER ',';
 
-COPY Staff(SSN, 
-			fName, 
-			lName, 
-			address,
-			role,
-			employerID)
-FROM 'staff.csv'
-WITH DELIMITER ',';	
+\COPY Staff(SSN, fName, lName, address, role, employerID) FROM '../data/staff.csv' WITH DELIMITER ',';	
 
 UPDATE hotel 
 SET manager = Staff.ssn
 FROM Staff
 WHERE hotel.hotelID = Staff.employerID AND Staff.role = 'Manager'; 
 
+\COPY Room(	hotelID, roomNo, roomType) FROM '../data/room.csv' WITH DELIMITER ',';	
 
-COPY Room(	hotelID,
-		    roomNo,
-			roomType)
-FROM 'room.csv'
-WITH DELIMITER ',';	
+\COPY Customer(	customerID, fName, lName, Address, phNo, DOB, gender) FROM '../data/customer.csv' WITH DELIMITER ',';	
 
-COPY Customer(	customerID,
-			    fName,
-			    lName,
-			    Address,
-				phNo,
-				DOB,
-			    gender)
-FROM 'customer.csv'
-WITH DELIMITER ',';	
+\COPY MaintenanceCompany(cmpID, name, address, isCertified) FROM '../data/maintenanceCompany.csv' WITH DELIMITER ',';	
 
+\COPY Booking( bID, customer, hotelID, roomNo, bookingDate, noOfPeople, price) FROM '../data/booking.csv' WITH DELIMITER ',';	
 
-COPY MaintenanceCompany(cmpID,
-						name,
-						address,
-						isCertified)
-FROM 'maintenanceCompany.csv'
-WITH DELIMITER ',';	
+\COPY Repair( rID, hotelID, roomNo, mCompany, repairDate, description, repairType) FROM '../data/repair.csv' WITH DELIMITER ',';	
 
-COPY Booking( bID,
-			  customer,
-			  hotelID,
-			  roomNo,
-			  bookingDate,
-			  noOfPeople,
-			  price)
-FROM 'booking.csv'
-WITH DELIMITER ',';	
+\COPY Request(reqID, managerID, repairID, requestDate, description) FROM '../data/request.csv'WITH DELIMITER ',';		
 
-COPY Repair( rID,
-			 hotelID,
-			 roomNo,
-			 mCompany,
-			 repairDate,
-			 description,
-			 repairType)
-FROM 'repair.csv'
-WITH DELIMITER ',';	
-
-COPY Request(reqID,
-			 managerID,
-			 repairID,
-			 requestDate,
-			 description)
-FROM 'request.csv'
-WITH DELIMITER ',';		
-
-COPY Assigned(asgID,
-			  staffID,
-			  hotelID,
-			  roomNo)
-FROM 'assigned.csv'
-WITH DELIMITER ',';		
-	
+\COPY Assigned(asgID, staffID, hotelID, roomNo) FROM '../data/assigned.csv' WITH DELIMITER ',';			
