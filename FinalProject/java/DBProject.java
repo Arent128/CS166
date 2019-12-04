@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -254,10 +255,87 @@ public class DBProject {
 
    
    public static void addCustomer(DBProject esql){
-	  // Given customer details add the customer in the DB 
-      // Your code goes here.
-      // ...
-      // ...
+	  // Given customer details add the customer in the DB
+       ArrayList<String> custData = new ArrayList<String();
+       String inFirst;
+       do {
+           System.out.print("Please enter customer's first name: ");
+           try {
+               input = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inLast;
+       do {
+           System.out.print("Please enter customer's last name: ");
+           try {
+               inLast = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inAddr;
+       do {
+           System.out.print("Please enter customer's address: ");
+           try {
+               inAddr = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inPhone;
+       do {
+           System.out.print("Please enter customer's phone number: ");
+           try {
+               inPhone = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inDate;
+       do {
+           System.out.print("Please enter customer's Date of Birth (mm/dd/yyyy):" );
+           try {
+               inDate = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inGender;
+       do {
+           System.out.print("Please enter customer's gender (Male/Female/Other): ");
+           try {
+               input = in.readline();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+       int finalId = executeQuery("SELECT customerID FROM Customer"); //Assuming that customers are never deleted, as such the number of rows = final id + 1
+       custData.add(Integer.toString(finalId));
+       custData.add(inFirst);
+       custData.add(inLast);
+       custData.add(inAddr);
+       custData.add(inPhone);
+       custData.add(inDate);
+       custData.add(inGender);
+
+       string finalUpdate = formatBasicUpdate(custData);
+
+
    }//end addCustomer
 
    public static void addRoom(DBProject esql){
@@ -364,4 +442,7 @@ public class DBProject {
       // ...
    }//end listRepairsMade
 
+    public static void formatBasicUpdate(ArrayList<String> data) {
+
+    }
 }//end DBProject
