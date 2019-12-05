@@ -256,9 +256,9 @@ public class DBProject {
    
    public static void addCustomer(DBProject esql){
 	  // Given customer details add the customer in the DB
-       ArrayList<String> custData = new ArrayList<String();
+       ArrayList<String> custData = new ArrayList<String>();
        String inFirst;
-       do {
+       do { //Ask for first name
            System.out.print("Please enter customer's first name: ");
            try {
                input = in.readLine();
@@ -269,7 +269,7 @@ public class DBProject {
            }//end try
        }while (true);
        String inLast;
-       do {
+       do { //Ask for last name
            System.out.print("Please enter customer's last name: ");
            try {
                inLast = in.readLine();
@@ -280,7 +280,7 @@ public class DBProject {
            }//end try
        }while (true);
        String inAddr;
-       do {
+       do { //Ask for address
            System.out.print("Please enter customer's address: ");
            try {
                inAddr = in.readLine();
@@ -291,7 +291,7 @@ public class DBProject {
            }//end try
        }while (true);
        String inPhone;
-       do {
+       do { //Ask for phone number
            System.out.print("Please enter customer's phone number: ");
            try {
                inPhone = in.readLine();
@@ -302,7 +302,7 @@ public class DBProject {
            }//end try
        }while (true);
        String inDate;
-       do {
+       do { //Ask for date of birth
            System.out.print("Please enter customer's Date of Birth (mm/dd/yyyy):" );
            try {
                inDate = in.readLine();
@@ -313,10 +313,10 @@ public class DBProject {
            }//end try
        }while (true);
        String inGender;
-       do {
+       do { //Ask for gender
            System.out.print("Please enter customer's gender (Male/Female/Other): ");
            try {
-               input = in.readline();
+               inGender = in.readline();
                break;
            }catch (Exception e) {
                System.out.println("Your input is invalid!");
@@ -324,6 +324,7 @@ public class DBProject {
            }//end try
        }while (true);
 
+       //Formatting and choosing ID
        int finalId = executeQuery("SELECT customerID FROM Customer"); //Assuming that customers are never deleted, as such the number of rows = final id + 1
        custData.add(Integer.toString(finalId));
        custData.add(inFirst);
@@ -332,17 +333,61 @@ public class DBProject {
        custData.add(inPhone);
        custData.add(inDate);
        custData.add(inGender);
-
-       string finalUpdate = formatBasicUpdate(custData);
-
+       string finalUpdate = "INSERT INTO Customers " + formatValues(custData) + ";";
+       
+       //Execute the update
+       executeUpdate(finalUpdate);
 
    }//end addCustomer
 
    public static void addRoom(DBProject esql){
-	  // Given room details add the room in the DB
-      // Your code goes here.
-      // ...
-      // ...
+       ArrayList<String> roomData = new ArrayList<String>();
+       String inHotel;
+       do { //Ask for hotel ID. Assuming that the Hotel ID is information available to who would be using this.
+           System.out.print("Please enter Hotel ID: ");
+           try {
+               inHotel = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       do { //Ask for room number
+           System.out.print("Please enter room's number: ");
+           try {
+               inNo = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inType;
+       do { //ask for type of room
+           System.out.print("Please enter room type: ");
+           try {
+               inType = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+       //Check for uniqueness in database. If the query has any rows there must be something with the same hotelId and roomno.
+       int check = executeQuery("SELECT * FROM Rooms R WHERE R.hotelID = \'" + inHotel + "\'" + " AND R.roomNo = \'" + inNo "\';");
+       if(check != 0) {
+          System.out.print('Error: Room Number already exists for given HotelID');
+       }
+       else {
+          roomData.add(inHotel);
+          roomData.add(inNo);
+          roomData.add(inType);
+          String finalUpdate = "INSERT INTO Room " + formatValues(roomData) + ";";
+          executeUpdate(finalUpdate);
+       }
+
    }//end addRoom
 
    public static void addMaintenanceCompany(DBProject esql){
@@ -442,7 +487,28 @@ public class DBProject {
       // ...
    }//end listRepairsMade
 
-    public static void formatBasicUpdate(ArrayList<String> data) {
+    public static void formatValues(ArrayList<String> data) {
+      String result = "VALUES (";
+      for(int i = 0; i < data.size(); i++) {
+        result += data.get(i);
+        result += ", ";
+      }
+      result += ");"
+      return result;
+    }
 
+    public static void internalQuery(String query) throws SQLException {
+       // creates a statement object
+      Statement stmt = this._connection.createStatement ();
+
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
+
+      /*
+       ** obtains the metadata object for the returned result set.  The metadata
+       ** contains row and column info.
+       */
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      return rsmd;
     }
 }//end DBProject
