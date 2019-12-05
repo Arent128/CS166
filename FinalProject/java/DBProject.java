@@ -259,10 +259,15 @@ public class DBProject {
        ArrayList<String> custData = new ArrayList<String>();
        String inFirst;
        do { //Ask for first name
-           System.out.print("Please enter customer's first name: ");
+           System.out.print("Please enter customer's first name (Max 30 characters): ");
            try {
-               input = in.readLine();
+               inFirst = in.readLine();
+               if(inFirst.length() > 30) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
                break;
+
            }catch (Exception e) {
                System.out.println("Your input is invalid!");
                continue;
@@ -270,9 +275,13 @@ public class DBProject {
        }while (true);
        String inLast;
        do { //Ask for last name
-           System.out.print("Please enter customer's last name: ");
+           System.out.print("Please enter customer's last name (Max 30 characters): ");
            try {
                inLast = in.readLine();
+               if(inLast.length() > 30) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
                break;
            }catch (Exception e) {
                System.out.println("Your input is invalid!");
@@ -353,6 +362,8 @@ public class DBProject {
                continue;
            }//end try
        }while (true);
+
+       String inNo;
        do { //Ask for room number
            System.out.print("Please enter room's number: ");
            try {
@@ -363,11 +374,16 @@ public class DBProject {
                continue;
            }//end try
        }while (true);
+
        String inType;
        do { //ask for type of room
-           System.out.print("Please enter room type: ");
+           System.out.print("Please enter room type (Max 10 characters): ");
            try {
                inType = in.readLine();
+               if(inType.length() > 10) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
                break;
            }catch (Exception e) {
                System.out.println("Your input is invalid!");
@@ -392,8 +408,83 @@ public class DBProject {
 
    public static void addMaintenanceCompany(DBProject esql){
       // Given maintenance Company details add the maintenance company in the DB
-      // ...
-      // ...
+      ArrayList<String> matData = new ArrayList<String>();
+      String incmpID;
+      do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
+           System.out.print("Please enter Company ID: ");
+           try {
+               incmpID = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+
+      String inName;
+      do { //Ask for company name
+           System.out.print("Please enter Company Name (Max 30 characters): ");
+           try {
+               inName = in.readLine();
+               if(inName.length() > 30) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+
+      String inAddr;
+      do { //Ask for Address
+           System.out.print("Please enter address: ");
+           try {
+               inAddr = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+
+     String inCert;
+      do { //Ask for certification status
+           System.out.print("Is this company certified? (y/n)");
+           try {
+               temp = in.readLine();
+               if (temp == "y") {
+                  inCert = "TRUE";
+               }
+               else if (temp == "n") {
+                  inCert = "FALSE";
+               }
+               else {
+                System.out.print("Invalid input.");
+                continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+       //Check for uniqueness in database. If the query has any rows there must be something with the same hotelId and roomno.
+       int check = executeQuery("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + incmpID + "\';");
+       if(check != 0) {
+          System.out.print('Error: Room Number already exists for given HotelID');
+       }
+       else {
+          matData.add(incmpID);
+          matData.add(inName);
+          matData.add(inAddr);
+          matData.add(inCert);
+          String finalUpdate = "INSERT INTO MaintenanceCompany " + formatValues(matData) + ";";
+          executeUpdate(finalUpdate);
+       }
+
+
    }//end addMaintenanceCompany
 
    public static void addRepair(DBProject esql){
@@ -487,7 +578,7 @@ public class DBProject {
       // ...
    }//end listRepairsMade
 
-    public static void formatValues(ArrayList<String> data) {
+    public static void formatValues(ArrayList<String> data) { //Helper function to format data into VALUES (x,y,z)
       String result = "VALUES (";
       for(int i = 0; i < data.size(); i++) {
         result += data.get(i);
@@ -497,7 +588,7 @@ public class DBProject {
       return result;
     }
 
-    public static void internalQuery(String query) throws SQLException {
+    public static void internalQuery(String query) throws SQLException { //Helper function to query for something without printing it.
        // creates a statement object
       Statement stmt = this._connection.createStatement ();
 
