@@ -125,6 +125,67 @@ public class DBProject {
       return rowCount;
    }//end executeQuery
 
+   public int errorChecker(String query) throws SQLException { 
+      // creates a statement object
+      Statement stmt = this._connection.createStatement ();
+
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
+
+      /*
+       ** obtains the metadata object for the returned result set.  The metadata
+       ** contains row and column info.
+       */
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      int numCol = rsmd.getColumnCount ();
+      int rowCount = 0;
+
+      // iterates through the result set and output them to standard out.
+      boolean outputHeader = true;
+      while (rs.next()){
+	 if(outputHeader){
+	    for(int i = 1; i <= numCol; i++){
+	    }
+	    outputHeader = false;
+	 }
+         for (int i=1; i<=numCol; ++i)
+         ++rowCount;
+      }//end while
+      stmt.close ();
+      return rowCount;
+   }
+
+   public String getSelectString(String query) throws SQLException  { 
+      // creates a statement object
+      String result = "";
+      Statement stmt = this._connection.createStatement ();
+
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
+
+      /*
+       ** obtains the metadata object for the returned result set.  The metadata
+       ** contains row and column info.
+       */
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      int numCol = rsmd.getColumnCount ();
+
+      // iterates through the result set and output them to standard out.
+      boolean outputHeader = true;
+      while (rs.next()){
+	 if(outputHeader){
+	    for(int i = 1; i <= numCol; i++){
+	    }
+	    outputHeader = false;
+	 }
+         for (int i=1; i<=numCol; ++i)
+            result = rs.getString(i);
+      }//end while
+      stmt.close ();
+      return result;
+   }
+
+
    /**
     * Method to close the physical connection if it is open.
     */
@@ -256,112 +317,241 @@ public class DBProject {
    public static void addCustomer(DBProject esql){
 	  // Given customer details add the customer in the DB 
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end addCustomer
 
    public static void addRoom(DBProject esql){
 	  // Given room details add the room in the DB
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end addRoom
 
    public static void addMaintenanceCompany(DBProject esql){
       // Given maintenance Company details add the maintenance company in the DB
-      // ...
-      // ...
+      
    }//end addMaintenanceCompany
 
    public static void addRepair(DBProject esql){
 	  // Given repair details add repair in the DB
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end addRepair
 
    public static void bookRoom(DBProject esql){
 	  // Given hotelID, roomNo and customer Name create a booking in the DB 
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end bookRoom
 
    public static void assignHouseCleaningToRoom(DBProject esql){
 	  // Given Staff SSN, HotelID, roomNo Assign the staff to the room 
       // Your code goes here.
-      // ...
-      // ...
+      try   {
+        String userIn_1 = "";
+        String userIn_2 = "";
+        String userIn_3 = "";
+        System.out.println("Please enter a staff SSN to assign for cleaning");
+        userIn_1 = in.readLine();
+        String errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'HouseCleaning';", userIn_1);
+        int errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild employee/this employee's role is not in house cleaning", userIn_1));
+            return;
+        }
+        System.out.println("Please enter a HotelID to select a hotel");
+        userIn_2 = in.readLine();
+        errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_2);
+        errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_2));
+            return;
+        }
+        System.out.println("Please enter the roomNo to be cleaned");
+        userIn_3 = in.readLine();
+        errorCheck = String.format("SELECT r.roomNo FROM Room r, Hotel h WHERE h.hotelID = %s and r.roomNo = %s;", userIn_2, userIn_3);
+        errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild room in given HotelID %s", userIn_3, userIn_2));
+            return;
+        }
+        System.out.println(userIn_1 + " " + userIn_2 + " " + userIn_3);
+        int assignVal = (Integer.parseInt(esql.getSelectString("SELECT MAX(asgID) FROM Assigned;")) + 1);
+
+        String insertStatement = String.format("INSERT INTO Assigned(asgID, staffID, hotelID, roomNo) VALUES(%s, %s, %s, %s)", Integer.toString(assignVal), userIn_1, userIn_2, userIn_3);
+        esql.executeUpdate(insertStatement);
+        System.out.println(String.format("StaffID %s was assigned to clean roomNo %s at hotelID %s. The value of the asgID for the job was %s", userIn_1, userIn_3, userIn_2, Integer.toString(assignVal)));
+
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end assignHouseCleaningToRoom
    
    public static void repairRequest(DBProject esql){
 	  // Given a hotelID, Staff SSN, roomNo, repairID , date create a repair request in the DB
       // Your code goes here.
-      // ...
-      // ...
+      try {
+          String userIn_1 = "", userIn_2 = "", userIn_3 = "", userIn_4 = "", userIn_5 = "";
+          System.out.println("Please enter a hotelID");
+          userIn_1 = in.readLine();
+          System.out.println("Please enter a Staff SSN");
+          userIn_2 = in.readLine();
+          System.out.println("Please enter a roomNo");
+          userIn_3 = in.readLine();
+          System.out.println("Please enter a repairID");
+          userIn_4 = in.readLine();
+          /************************************************
+            NEED TO DO VERIFICATION ON THE DATE
+           *********************************************/
+          System.out.println("Please enter a repair date");
+          userIn_5 = in.readLine();
+        String errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_1);
+        int errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_1));
+            return;
+        }
+        errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'Manager';", userIn_2);
+        errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild employee/this employee's role is not a Manager", userIn_2));
+            return;
+        }
+        errorCheck = String.format("SELECT r.roomNo FROM Room r, Hotel h WHERE h.hotelID = %s and r.roomNo = %s;", userIn_1, userIn_3);
+        errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild room in given HotelID %s", userIn_3, userIn_1));
+            return;
+        }
+        errorCheck = String.format("SELECT rep.rID FROM Repair rep WHERE rep.rID = %s;", userIn_4);
+        errorResult = esql.errorChecker(errorCheck);
+        if(errorResult == 0)   {
+            System.out.println(String.format("Error %s is not a vaild repairID", userIn_4));
+            return;
+        }
+        errorCheck = String.format("SELECT rep.repairDate FROM Repair rep WHERE rep.rID = %s and rep.repairDate = '%s';", userIn_4, userIn_5);
+        errorResult = esql.errorChecker(errorCheck);
+        if(errorResult > 0)   {
+            System.out.println(String.format("Error repairID %s is already scheduled for %s", userIn_4, userIn_5));
+            return;
+        }
+        int requestVal = (Integer.parseInt(esql.getSelectString("SELECT MAX(reqID) FROM Request")) + 1);
+        System.out.println("Briefly describe the issue to repair");
+        String issue = in.readLine();
+        String repairRequest = String.format("INSERT INTO Request(reqID, managerID, repairID, requestDate, description) VALUES (%s, %s, %s, '%s'::date, '%s')", Integer.toString(requestVal), userIn_2, userIn_4, userIn_5, issue);
+        esql.executeUpdate(repairRequest);
+        System.out.println(String.format("Request for roomNo %s at HotelID %s was created by managerID %s. The repairID %s is scheduled for %s", userIn_3, userIn_1, userIn_2, userIn_4, userIn_5));
+
+      }
+      catch (Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end repairRequest
    
    public static void numberOfAvailableRooms(DBProject esql){
 	  // Given a hotelID, get the count of rooms available 
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end numberOfAvailableRooms
    
    public static void numberOfBookedRooms(DBProject esql){
 	  // Given a hotelID, get the count of rooms booked
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end numberOfBookedRooms
    
    public static void listHotelRoomBookingsForAWeek(DBProject esql){
 	  // Given a hotelID, date - list all the rooms available for a week(including the input date) 
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end listHotelRoomBookingsForAWeek
    
    public static void topKHighestRoomPriceForADateRange(DBProject esql){
 	  // List Top K Rooms with the highest price for a given date range
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end topKHighestRoomPriceForADateRange
    
    public static void topKHighestPriceBookingsForACustomer(DBProject esql){
 	  // Given a customer Name, List Top K highest booking price for a customer 
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end topKHighestPriceBookingsForACustomer
    
    public static void totalCostForCustomer(DBProject esql){
 	  // Given a hotelID, customer Name and date range get the total cost incurred by the customer
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end totalCostForCustomer
    
    public static void listRepairsMade(DBProject esql){
 	  // Given a Maintenance company name list all the repairs along with repairType, hotelID and roomNo
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end listRepairsMade
    
    public static void topKMaintenanceCompany(DBProject esql){
 	  // List Top K Maintenance Company Names based on total repair count (descending order)
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end topKMaintenanceCompany
    
    public static void numberOfRepairsForEachRoomPerYear(DBProject esql){
 	  // Given a hotelID, roomNo, get the count of repairs per year
       // Your code goes here.
-      // ...
-      // ...
+      try {
+      }
+      catch(Exception e)   {
+        System.out.println(e.getMessage());
+      }
    }//end listRepairsMade
 
 }//end DBProject
