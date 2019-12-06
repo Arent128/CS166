@@ -399,7 +399,7 @@ public class DBProject {
 
 	try {
 	       //Formatting and choosing ID
-	       int finalId = esql.executeQuery("SELECT C.customerID FROM Customer C;"); //Assuming that customers are never deleted, as such the number of rows = final id + 1
+	       int finalId = esql.errorChecker("SELECT C.customerID FROM Customer C;"); //Assuming that customers are never deleted, as such the number of rows = final id + 1
 	       custData.add(Integer.toString(finalId));
 	       custData.add(inFirst);
 	       custData.add(inLast);
@@ -409,7 +409,7 @@ public class DBProject {
 	       custData.add(inGender);
 	       String finalUpdate = "INSERT INTO Customer (customerID, fName, lName, Address, phNo, DOB, gender) " + formatValues(custData) + ";";
 	       
-		System.out.println(finalUpdate);
+		//System.out.println(finalUpdate);
 	       //Execute the update
 	       esql.executeUpdate(finalUpdate);
 	}
@@ -429,7 +429,7 @@ public class DBProject {
            System.out.print("Please enter Hotel ID: ");
            try {
                inHotel = in.readLine();
-       	       int checkHotel = esql.executeQuery("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inHotel + "\';");
+       	       int checkHotel = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inHotel + "\';");
        		if (checkHotel < 1) {
          		System.out.println("Error: Hotel ID not found in database");
        	   		continue;
@@ -447,7 +447,7 @@ public class DBProject {
            try {
                inNo = in.readLine();
       		 //Check for uniqueness in database. If the query has any rows there must be something with the same hotelID and roomno.
-	       int checkUniqueness = esql.executeQuery("SELECT * FROM Room R WHERE R.hotelID = \'" + inHotel + "\'" + " AND R.roomNo = \'" + inNo + "\';");
+	       int checkUniqueness = esql.errorChecker("SELECT * FROM Room R WHERE R.hotelID = \'" + inHotel + "\'" + " AND R.roomNo = \'" + inNo + "\';");
 
 	       if(checkUniqueness != 0) {
 		  System.out.println("Error: Room Number already exists for given HotelID");
@@ -486,7 +486,7 @@ public class DBProject {
 		esql.executeUpdate(finalUpdate);
 	}
 	catch (Exception e) {
-		System.out.println("Error adding Room to SQL database");
+		System.out.println(e);
 	}
 
 
@@ -501,7 +501,7 @@ public class DBProject {
            try {
                incmpID = in.readLine();
 	       //Check for uniqueness in database. If the query has any rows there must be something with the same hotelId and roomno.
-	       int check = esql.executeQuery("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + incmpID + "\';");
+	       int check = esql.errorChecker("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + incmpID + "\';");
 	       if(check != 0) {
 		  System.out.println("Error: company ID not unique.");
 		  continue;
@@ -543,13 +543,15 @@ public class DBProject {
 
      String inCert;
       do { //Ask for certification status
+	   String temp;
            System.out.print("Is this company certified? (y/n)");
            try {
-               String temp = in.readLine();
-               if (temp == "y") {
+               temp = in.readLine();
+		temp = temp.toLowerCase();
+               if (temp.equals("y") || temp.equals("yes")) {
                   inCert = "TRUE";
                }
-               else if (temp == "n") {
+               else if (temp.equals("n") || temp.equals("no")) {
                   inCert = "FALSE";
                }
                else {
@@ -558,7 +560,7 @@ public class DBProject {
                }
                break;
            }catch (Exception e) {
-               System.out.println("Your input is invalid!");
+               System.out.println(e);
                continue;
            }//end try
       }while (true);
@@ -572,7 +574,7 @@ public class DBProject {
 		esql.executeUpdate(finalUpdate);
 	}
 	catch (Exception e) {
-		System.out.println("Error adding Maintenance Company to SQL database");
+		System.out.println(e);
 	}
        
 
@@ -589,7 +591,7 @@ public class DBProject {
            System.out.print("Please enter Hotel ID: ");
            try {
                inhID = in.readLine();
-               int check = esql.executeQuery("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
+               int check = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
                if(check < 1) { //Make sure the hotel exists
                   System.out.println("Error: hotel ID not found.");
                   continue;
@@ -605,7 +607,7 @@ public class DBProject {
            System.out.print("Please enter room number: ");
            try {
                inRoomNo = in.readLine();
-               int check = esql.executeQuery("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
+               int check = esql.errorChecker("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
                if(check < 1) { //Make sure the room exists in the specified hotel
                   System.out.println("Error: room not found for given hotel.");
                   continue;
@@ -622,7 +624,7 @@ public class DBProject {
            System.out.print("Please enter Company ID: ");
            try {
                inmID = in.readLine();
-               int check = esql.executeQuery("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + inmID + "\';");
+               int check = esql.errorChecker("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + inmID + "\';");
                if(check < 1) { //Make sure the maintenance company exists
                   System.out.println("Error: company ID not found.");
                   continue;
@@ -671,7 +673,7 @@ public class DBProject {
       }while (true);  
 	
 	try {
-	      int finalId = esql.executeQuery("SELECT rID FROM Repair"); //Assuming that repairs are never deleted, as such the number of rows = final id + 1
+	      int finalId = esql.errorChecker("SELECT rID FROM Repair"); //Assuming that repairs are never deleted, as such the number of rows = final id + 1
 	      repData.add(Integer.toString(finalId));
 	      repData.add(inhID);
 	      repData.add(inRoomNo);
@@ -695,10 +697,10 @@ public class DBProject {
 
     String incID;
     do { //Ask for customer ID. Assuming that the customer ID is information available to who would be using this.
-          System.out.print("Please enter Hotel ID: ");
+          System.out.print("Please enter Customer ID: ");
           try {
               incID = in.readLine();
-              int check = esql.executeQuery("SELECT * FROM Customer C WHERE C.customerID = \'" + incID + "\';");
+              int check = esql.errorChecker("SELECT * FROM Customer C WHERE C.customerID = \'" + incID + "\';");
               if(check < 1) { //Make sure the customer exists
                 System.out.println("Error: customer ID not found.");
                 continue;
@@ -715,7 +717,7 @@ public class DBProject {
           System.out.print("Please enter Hotel ID: ");
           try {
               inhID = in.readLine();
-              int check = esql.executeQuery("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
+              int check = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
               if(check < 1) { //Make sure the hotel exists
                 System.out.println("Error: hotel ID not found.");
                 continue;
@@ -732,7 +734,7 @@ public class DBProject {
            System.out.print("Please enter room number: ");
            try {
                inRoomNo = in.readLine();
-               int check = esql.executeQuery("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
+               int check = esql.errorChecker("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
                if(check < 1) { //Make sure the room exists in the specified hotel
                   System.out.println("Error: room not found for given hotel.");
                   continue;
@@ -782,7 +784,8 @@ public class DBProject {
       }while (true);   
 
 	try {
-	      int finalId = esql.executeQuery("SELECT bID FROM Booking" ); //Assuming that bookings are never deleted, as such the number of rows = final id + 1
+	      int finalId = esql.errorChecker("SELECT bID FROM Booking" ); //Assuming that bookings are never deleted, as such the number of rows = final id + 1
+	      bookData.add(Integer.toString(finalId));
 	      bookData.add(incID);
 	      bookData.add(inhID);
 	      bookData.add(inRoomNo);
@@ -791,10 +794,11 @@ public class DBProject {
 	      bookData.add(inPrice);
 
 	      String finalUpdate = "INSERT INTO Repair " + formatValues(bookData) + ";";
+		System.out.println(finalUpdate);
 	      esql.executeUpdate(finalUpdate);
 	}
 	catch (Exception e) {
-		System.out.println("Error adding booking to SQL database");
+		System.out.println(e);
 	}
 
    }//end bookRoom
