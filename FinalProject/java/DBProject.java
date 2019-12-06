@@ -316,7 +316,6 @@ public class DBProject {
 
    
    public static void addCustomer(DBProject esql){
-
 	  // Given customer details add the customer in the DB
        ArrayList<String> custData = new ArrayList<String>();
        String inFirst;
@@ -387,8 +386,8 @@ public class DBProject {
 
        String inGender;
        do { //Ask for gender
-           System.out.print("Please enter customer's gender (Male/Female/Other): ");
-           try {
+	   try{
+           	System.out.print("Please enter customer's gender (Male/Female/Other): ");
                inGender = in.readLine();
                break;
            }catch (Exception e) {
@@ -396,6 +395,7 @@ public class DBProject {
                continue;
            }//end try
        }while (true);
+
 
 	try {
 	       //Formatting and choosing ID
@@ -417,8 +417,6 @@ public class DBProject {
 		System.out.println(e.getMessage());
 	}
 
-
-
    }//end addCustomer
 
    public static void addRoom(DBProject esql){
@@ -429,6 +427,7 @@ public class DBProject {
            System.out.print("Please enter Hotel ID: ");
            try {
                inHotel = in.readLine();
+
        	       int checkHotel = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inHotel + "\';");
        		if (checkHotel < 1) {
          		System.out.println("Error: Hotel ID not found in database");
@@ -446,13 +445,14 @@ public class DBProject {
            System.out.print("Please enter room's number: ");
            try {
                inNo = in.readLine();
-      		 //Check for uniqueness in database. If the query has any rows there must be something with the same hotelID and roomno.
+		//Check for uniqueness in database. If the query has any rows there must be something with the same hotelID and roomno.
 	       int checkUniqueness = esql.errorChecker("SELECT * FROM Room R WHERE R.hotelID = \'" + inHotel + "\'" + " AND R.roomNo = \'" + inNo + "\';");
 
 	       if(checkUniqueness != 0) {
 		  System.out.println("Error: Room Number already exists for given HotelID");
 		  continue;
 	       }
+
                break;
            }catch (Exception e) {
                System.out.println("Your input is invalid!");
@@ -488,7 +488,6 @@ public class DBProject {
 	catch (Exception e) {
 		System.out.println(e);
 	}
-
 
    }//end addRoom
 
@@ -560,6 +559,7 @@ public class DBProject {
                }
                break;
            }catch (Exception e) {
+
                System.out.println(e);
                continue;
            }//end try
@@ -576,14 +576,12 @@ public class DBProject {
 	catch (Exception e) {
 		System.out.println(e);
 	}
-       
 
 
    }//end addMaintenanceCompany
 
    public static void addRepair(DBProject esql){
 	  // Given repair details add repair in the DB
-
       ArrayList<String> repData = new ArrayList<String>();
 
       String inhID;
@@ -601,12 +599,15 @@ public class DBProject {
                System.out.println("Your input is invalid!");
                continue;
            }//end try
+
 	}while(true);	
+
       String inRoomNo;
       do { //Ask for room number. Assuming that the room number is information available to who would be using this.
            System.out.print("Please enter room number: ");
            try {
                inRoomNo = in.readLine();
+
                int check = esql.errorChecker("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
                if(check < 1) { //Make sure the room exists in the specified hotel
                   System.out.println("Error: room not found for given hotel.");
@@ -624,6 +625,7 @@ public class DBProject {
            System.out.print("Please enter Company ID: ");
            try {
                inmID = in.readLine();
+
                int check = esql.errorChecker("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + inmID + "\';");
                if(check < 1) { //Make sure the maintenance company exists
                   System.out.println("Error: company ID not found.");
@@ -671,7 +673,7 @@ public class DBProject {
                continue;
            }//end try
       }while (true);  
-	
+
 	try {
 	      int finalId = esql.errorChecker("SELECT rID FROM Repair"); //Assuming that repairs are never deleted, as such the number of rows = final id + 1
 	      repData.add(Integer.toString(finalId));
@@ -998,6 +1000,7 @@ public class DBProject {
       }
    }//end listRepairsMade
 
+
     public static String formatValues(ArrayList<String> data) { //Helper function to format data into VALUES (x,y,z)
       String result = "VALUES (";
       for(int i = 0; i < data.size(); i++) {
@@ -1011,6 +1014,7 @@ public class DBProject {
     }
 
     public ResultSetMetaData internalQuery(String query) throws SQLException { //Helper function to query for something without printing it.
+
        // creates a statement object
       Statement stmt = this._connection.createStatement ();
 
