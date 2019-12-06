@@ -551,7 +551,7 @@ public class DBProject {
            System.out.print("Is this company certified? (y/n)");
            try {
                temp = in.readLine();
-		temp = temp.toLowerCase();
+			   temp = temp.toLowerCase();
                if (temp.equals("y") || temp.equals("yes")) {
                   inCert = "TRUE";
                }
