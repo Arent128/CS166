@@ -682,12 +682,13 @@ public class DBProject {
 	      repData.add(inmID);
 	      repData.add(inrDate);
 	      repData.add(inDesc);
+	      repData.add(inType);
 
 	      String finalUpdate = "INSERT INTO Repair " + formatValues(repData) + ";";
 	      esql.executeUpdate(finalUpdate);
 	}
 	catch (Exception e) {
-		System.out.println("Error adding repair to SQL database");
+		System.out.println("Error adding repair to SQL database: " + e.getMessage());
 	}
 
     }//end addRepair
@@ -972,12 +973,25 @@ public class DBProject {
    
    public static void listRepairsMade(DBProject esql){
 	  // Given a Maintenance company name list all the repairs along with repairType, hotelID and roomNo
-      // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
+	  String input;
+	  do {
+		  try {
+			  System.out.print("Enter name of Maintenance Company: ");
+			  input = in.readLine();
+			  break;
+		  }
+		  catch(Exception e)   {
+			System.out.println(e.getMessage());
+			continue;
+		  }
+	  }while(true);
+	  try {
+		esql.executeQuery("SELECT r.rID, r.repairType, r.hotelID, r.roomNo FROM Repair r, MaintenanceCompany m WHERE m.cmpID = r.mCompany AND m.name = \'" + input + "\';");
+		//System.out.println("SELECT r.rID, r.repairType, r.hotelID, r.roomNo FROM Repair r, MaintenanceCompany m WHERE m.cmpID = r.mCompany AND m.name = \'" + input + "\';");
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
    }//end listRepairsMade
    
    public static void topKMaintenanceCompany(DBProject esql){
