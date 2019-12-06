@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -315,48 +316,493 @@ public class DBProject {
 
    
    public static void addCustomer(DBProject esql){
-	  // Given customer details add the customer in the DB 
-      // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
+	  // Given customer details add the customer in the DB
+       ArrayList<String> custData = new ArrayList<String>();
+       String inFirst;
+       do { //Ask for first name
+           System.out.print("Please enter customer's first name (Max 30 characters): ");
+           try {
+               inFirst = in.readLine();
+               if(inFirst.length() > 30) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
+               break;
+
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inLast;
+       do { //Ask for last name
+           System.out.print("Please enter customer's last name (Max 30 characters): ");
+           try {
+               inLast = in.readLine();
+               if(inLast.length() > 30) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inAddr;
+       do { //Ask for address
+           System.out.print("Please enter customer's address: ");
+           try {
+               inAddr = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+       String inPhone;
+       do { //Ask for phone number
+           System.out.print("Please enter customer's phone number: ");
+           try {
+               inPhone = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+       String inDate;
+       do { //Ask for date of birth
+           System.out.print("Please enter customer's Date of Birth (mm/dd/yyyy):" );
+           try {
+               inDate = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+       String inGender;
+       do { //Ask for gender
+	   try{
+           	System.out.print("Please enter customer's gender (Male/Female/Other): ");
+               inGender = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+
+	try {
+	       //Formatting and choosing ID
+	       int finalId = esql.errorChecker("SELECT C.customerID FROM Customer C;"); //Assuming that customers are never deleted, as such the number of rows = final id + 1
+	       custData.add(Integer.toString(finalId));
+	       custData.add(inFirst);
+	       custData.add(inLast);
+	       custData.add(inAddr);
+	       custData.add(inPhone);
+	       custData.add(inDate);
+	       custData.add(inGender);
+	       String finalUpdate = "INSERT INTO Customer (customerID, fName, lName, Address, phNo, DOB, gender) " + formatValues(custData) + ";";
+	       
+		//System.out.println(finalUpdate);
+	       //Execute the update
+	       esql.executeUpdate(finalUpdate);
+	}
+	catch (Exception e) {
+		System.out.println(e.getMessage());
+	}
+
    }//end addCustomer
 
    public static void addRoom(DBProject esql){
-	  // Given room details add the room in the DB
-      // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
+
+       ArrayList<String> roomData = new ArrayList<String>();
+       String inHotel;
+       do { //Ask for hotel ID. Assuming that the Hotel ID is information available to who would be using this.
+           System.out.print("Please enter Hotel ID: ");
+           try {
+               inHotel = in.readLine();
+
+       	       int checkHotel = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inHotel + "\';");
+       		if (checkHotel < 1) {
+         		System.out.println("Error: Hotel ID not found in database");
+       	   		continue;
+      		}
+               break;
+           }catch (Exception e) {
+               System.out.println(e.getMessage());
+               continue;
+           }//end try
+       }while (true);
+
+       String inNo;
+       do { //Ask for room number
+           System.out.print("Please enter room's number: ");
+           try {
+               inNo = in.readLine();
+		//Check for uniqueness in database. If the query has any rows there must be something with the same hotelID and roomno.
+	       int checkUniqueness = esql.errorChecker("SELECT * FROM Room R WHERE R.hotelID = \'" + inHotel + "\'" + " AND R.roomNo = \'" + inNo + "\';");
+
+	       if(checkUniqueness != 0) {
+		  System.out.println("Error: Room Number already exists for given HotelID");
+		  continue;
+	       }
+
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+       String inType;
+       do { //ask for type of room
+           System.out.print("Please enter room type (Max 10 characters): ");
+           try {
+               inType = in.readLine();
+               if(inType.length() > 10) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+       }while (true);
+
+
+
+	try {
+	  	roomData.add(inHotel);
+		roomData.add(inNo);
+		roomData.add(inType);
+		String finalUpdate = "INSERT INTO Room " + formatValues(roomData) + ";";
+		esql.executeUpdate(finalUpdate);
+	}
+	catch (Exception e) {
+		System.out.println(e);
+	}
+
    }//end addRoom
 
    public static void addMaintenanceCompany(DBProject esql){
       // Given maintenance Company details add the maintenance company in the DB
-      
+      ArrayList<String> matData = new ArrayList<String>();
+      String incmpID;
+      do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
+           System.out.print("Please enter Company ID: ");
+           try {
+               incmpID = in.readLine();
+	       //Check for uniqueness in database. If the query has any rows there must be something with the same hotelId and roomno.
+	       int check = esql.errorChecker("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + incmpID + "\';");
+	       if(check != 0) {
+		  System.out.println("Error: company ID not unique.");
+		  continue;
+	       }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+
+      String inName;
+      do { //Ask for company name
+           System.out.print("Please enter Company Name (Max 30 characters): ");
+           try {
+               inName = in.readLine();
+               if(inName.length() > 30) {
+                System.out.print ("Error, Over character limit.");
+                continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+
+      String inAddr;
+      do { //Ask for Address
+           System.out.print("Please enter address: ");
+           try {
+               inAddr = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);
+
+     String inCert;
+      do { //Ask for certification status
+	   String temp;
+           System.out.print("Is this company certified? (y/n)");
+           try {
+               temp = in.readLine();
+		temp = temp.toLowerCase();
+               if (temp.equals("y") || temp.equals("yes")) {
+                  inCert = "TRUE";
+               }
+               else if (temp.equals("n") || temp.equals("no")) {
+                  inCert = "FALSE";
+               }
+               else {
+                System.out.println("Invalid input.");
+                continue;
+               }
+               break;
+           }catch (Exception e) {
+
+               System.out.println(e);
+               continue;
+           }//end try
+      }while (true);
+
+	try {
+		matData.add(incmpID);
+		matData.add(inName);
+		matData.add(inAddr);
+		matData.add(inCert);
+		String finalUpdate = "INSERT INTO MaintenanceCompany " + formatValues(matData) + ";";
+		esql.executeUpdate(finalUpdate);
+	}
+	catch (Exception e) {
+		System.out.println(e);
+	}
+
+
    }//end addMaintenanceCompany
 
    public static void addRepair(DBProject esql){
 	  // Given repair details add repair in the DB
-      // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
-   }//end addRepair
+      ArrayList<String> repData = new ArrayList<String>();
+
+      String inhID;
+      do { //Ask for hotel ID. Assuming that the hotel ID is information available to who would be using this.
+           System.out.print("Please enter Hotel ID: ");
+           try {
+               inhID = in.readLine();
+               int check = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
+               if(check < 1) { //Make sure the hotel exists
+                  System.out.println("Error: hotel ID not found.");
+                  continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+
+	}while(true);	
+
+      String inRoomNo;
+      do { //Ask for room number. Assuming that the room number is information available to who would be using this.
+           System.out.print("Please enter room number: ");
+           try {
+               inRoomNo = in.readLine();
+
+               int check = esql.errorChecker("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
+               if(check < 1) { //Make sure the room exists in the specified hotel
+                  System.out.println("Error: room not found for given hotel.");
+                  continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);        
+
+      String inmID;
+      do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
+           System.out.print("Please enter Company ID: ");
+           try {
+               inmID = in.readLine();
+
+               int check = esql.errorChecker("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + inmID + "\';");
+               if(check < 1) { //Make sure the maintenance company exists
+                  System.out.println("Error: company ID not found.");
+                  continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);  
+
+      String inrDate;
+      do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
+           System.out.print("Please enter date of repair (mm/dd/yyyy): ");
+           try {
+               inrDate = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);  
+
+      String inDesc;
+      do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
+           System.out.print("Please enter a description of the repair: ");
+           try {
+               inDesc = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);  
+
+      String inType;
+      do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
+           System.out.print("Please enter the type of repair (Max 10 characters): ");
+           try {
+               inType = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);  
+
+	try {
+	      int finalId = esql.errorChecker("SELECT rID FROM Repair"); //Assuming that repairs are never deleted, as such the number of rows = final id + 1
+	      repData.add(Integer.toString(finalId));
+	      repData.add(inhID);
+	      repData.add(inRoomNo);
+	      repData.add(inmID);
+	      repData.add(inrDate);
+	      repData.add(inDesc);
+
+	      String finalUpdate = "INSERT INTO Repair " + formatValues(repData) + ";";
+	      esql.executeUpdate(finalUpdate);
+	}
+	catch (Exception e) {
+		System.out.println("Error adding repair to SQL database");
+	}
+
+    }//end addRepair
+
 
    public static void bookRoom(DBProject esql){
 	  // Given hotelID, roomNo and customer Name create a booking in the DB 
-      // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
+    ArrayList<String> bookData = new ArrayList<String>();
+
+    String incID;
+    do { //Ask for customer ID. Assuming that the customer ID is information available to who would be using this.
+          System.out.print("Please enter Customer ID: ");
+          try {
+              incID = in.readLine();
+              int check = esql.errorChecker("SELECT * FROM Customer C WHERE C.customerID = \'" + incID + "\';");
+              if(check < 1) { //Make sure the customer exists
+                System.out.println("Error: customer ID not found.");
+                continue;
+              }
+              break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+          }//end try
+        }while (true);
+
+    String inhID;
+    do { //Ask for hotel ID. Assuming that the hotel ID is information available to who would be using this.
+          System.out.print("Please enter Hotel ID: ");
+          try {
+              inhID = in.readLine();
+              int check = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
+              if(check < 1) { //Make sure the hotel exists
+                System.out.println("Error: hotel ID not found.");
+                continue;
+              }
+              break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+          }//end try
+        }while (true);
+
+    String inRoomNo;
+      do { //Ask for room number. Assuming that the room number is information available to who would be using this.
+           System.out.print("Please enter room number: ");
+           try {
+               inRoomNo = in.readLine();
+               int check = esql.errorChecker("SELECT * FROM Room R WHERE R.roomNo = \'" + inRoomNo + "\' AND R.hotelID = \'" + inhID +"\';");
+               if(check < 1) { //Make sure the room exists in the specified hotel
+                  System.out.println("Error: room not found for given hotel.");
+                  continue;
+               }
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);       
+
+    String inBookDate;
+      do { //Ask for Booking Date. Assuming that the Booking Date is information available to who would be using this.
+           System.out.print("Please enter booking date (mm/dd/yyyy): ");
+           try {
+               inBookDate = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);   
+
+      String inNumPpl;
+      do { //Ask for Booking Date. Assuming that the Booking Date is information available to who would be using this.
+           System.out.print("Please enter number of guests: ");
+           try {
+               inNumPpl = in.readLine();
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);   
+
+      String inPrice;
+      do { //Ask for Booking Date. Assuming that the Booking Date is information available to who would be using this.
+           System.out.print("Please enter price (Dollars and Cents seperated by .): ");
+           try {
+               inPrice = in.readLine();
+               //TODO: Maybe do some data validation here.
+               break;
+           }catch (Exception e) {
+               System.out.println("Your input is invalid!");
+               continue;
+           }//end try
+      }while (true);   
+
+	try {
+	      int finalId = esql.errorChecker("SELECT bID FROM Booking" ); //Assuming that bookings are never deleted, as such the number of rows = final id + 1
+	      bookData.add(Integer.toString(finalId));
+	      bookData.add(incID);
+	      bookData.add(inhID);
+	      bookData.add(inRoomNo);
+	      bookData.add(inBookDate);
+	      bookData.add(inNumPpl);
+	      bookData.add(inPrice);
+
+	      String finalUpdate = "INSERT INTO Repair " + formatValues(bookData) + ";";
+		System.out.println(finalUpdate);
+	      esql.executeUpdate(finalUpdate);
+	}
+	catch (Exception e) {
+		System.out.println(e);
+	}
+
    }//end bookRoom
 
    public static void assignHouseCleaningToRoom(DBProject esql){
@@ -553,5 +999,34 @@ public class DBProject {
         System.out.println(e.getMessage());
       }
    }//end listRepairsMade
+
+
+    public static String formatValues(ArrayList<String> data) { //Helper function to format data into VALUES (x,y,z)
+      String result = "VALUES (";
+      for(int i = 0; i < data.size(); i++) {
+	result += "\'";
+        result += data.get(i);
+        result += "\', ";
+      }
+	result = result.substring(0,result.length()-2);
+      result += ")";
+      return result;
+    }
+
+    public ResultSetMetaData internalQuery(String query) throws SQLException { //Helper function to query for something without printing it.
+
+       // creates a statement object
+      Statement stmt = this._connection.createStatement ();
+
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
+
+      /*
+       ** obtains the metadata object for the returned result set.  The metadata
+       ** contains row and column info.
+       */
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      return rsmd;
+    }
 
 }//end DBProject
