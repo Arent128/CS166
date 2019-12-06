@@ -22,6 +22,11 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.time.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Date;
+
 
 /**
  * This class defines a simple embedded SQL utility class that is designed to
@@ -997,21 +1002,87 @@ public class DBProject {
    public static void topKMaintenanceCompany(DBProject esql){
 	  // List Top K Maintenance Company Names based on total repair count (descending order)
       // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
+	  int input;
+	  do {
+		  try {
+			  System.out.print("Enter number of Maintenance Companies you would like to see: ");
+			  input = Integer.parseInt(in.readLine());
+			  break;
+		  }
+		  catch(Exception e)   {
+			System.out.println(e.getMessage());
+			continue;
+		  }
+	  }while(true);
    }//end topKMaintenanceCompany
    
    public static void numberOfRepairsForEachRoomPerYear(DBProject esql){
 	  // Given a hotelID, roomNo, get the count of repairs per year
-      // Your code goes here.
-      try {
-      }
-      catch(Exception e)   {
-        System.out.println(e.getMessage());
-      }
+	  String inHotel;
+	  do {
+		  try {
+			  System.out.print("Enter hotel id: ");
+			  inHotel = in.readLine();
+			  int checkHotel = esql.errorChecker("SELECT * FROM Hotel h WHERE h.hotelID = " + inHotel + ";");
+			  if(checkHotel < 1) {
+				System.out.println("Error: Hotel not found");
+				continue;
+			  }
+			  break;
+		  }
+		  catch(Exception e)   {
+			System.out.println(e.getMessage());
+			continue;
+		  }
+	  }while(true);
+	  int roomNum;
+	  do {
+		  try {
+			  System.out.print("Enter room number: ");
+			  roomNum = Integer.parseInt(in.readLine());
+			  int checkRoom = esql.errorChecker("SELECT * FROM Room R WHERE R.hotelID = \'" + inHotel + "\'" + " AND R.roomNo = \'" + Integer.toString(roomNum) + "\';");
+			  if(checkRoom < 1) {
+				System.out.println("Error: Room not found in given Hotel");
+				continue;
+			  }			  
+			  break;
+		  }
+		  catch(Exception e)   {
+			System.out.println(e.getMessage());
+			continue;
+		  }
+	  }while(true);
+	  
+	  try {
+		  ResultSet data = esql.internalQuery("SELECT r.repairDate FROM Repair r WHERE r.hotelID = \'" + inHotel + "\'" + "AND r.roomNo = \'" + Integer.toString(roomNum) + "\';");
+		  //System.out.println("SELECT rp.repairDate FROM Repair rp WHERE rp.hotelID = \'" + inHotel + "\'" + " AND rp.roomNo = \'" + Integer.toString(roomNum) + "\';");
+		  HashMap<Integer, Integer> map = new HashMap<>();
+		  int year;
+		  LocalDate repDate;
+		  while(data.next()) { //get dates and hashmap them by year
+			  
+			  repDate = data.getDate("repairDate").toLocalDate();
+			  year = repDate.getYear();
+			  //System.out.println("Year: " + Integer.toString(year));
+			  
+			  if(map.get(year) != null) { //if year is already in map, increment the count
+					int old = map.get(year);
+					old += 1;
+					map.put(year, old);
+			  }
+			  else { //else add it to the map
+				  map.put(year, 1);
+			  }
+			  
+		  }//end while(data.next())
+		  //System.out.println(map);	
+		  map.forEach((key,value) -> System.out.println("Year: " + key + " Repair Count: " + value + "\n"));
+	  }
+	  catch (Exception e) {
+		  System.out.print("Error searching for repairs by year: " + e.getMessage());
+	  }//end try/catch
+		  
+	  
    }//end listRepairsMade
 
 
@@ -1027,20 +1098,15 @@ public class DBProject {
       return result;
     }
 
-    public ResultSetMetaData internalQuery(String query) throws SQLException { //Helper function to query for something without printing it.
+    public ResultSet internalQuery(String query) throws SQLException { //Helper function to query for something without printing it.
 
        // creates a statement object
       Statement stmt = this._connection.createStatement ();
 
       // issues the query instruction
       ResultSet rs = stmt.executeQuery (query);
-
-      /*
-       ** obtains the metadata object for the returned result set.  The metadata
-       ** contains row and column info.
-       */
-      ResultSetMetaData rsmd = rs.getMetaData ();
-      return rsmd;
+		
+		return rs;
     }
 
 }//end DBProject
