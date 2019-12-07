@@ -1727,6 +1727,13 @@ public class DBProject {
 			continue;
 		  }
 	  }while(true);
+	
+	  try {
+		esql.executeQuery("SELECT m.name, COUNT(DISTINCT r.rID) FROM Repair r, MaintenanceCompany m, WHERE r.mCompany = m.cmpID GROUP BY m.cmpID ORDER BY COUNT(DISTINCT r.rID) DESC LIMIT " + Integer.toString(input) + ";");
+	}
+	catch (Exception e) {
+		System.out.println("Error executing top K Maintenance Company query: " + e.getMessage());
+	}
    }//end topKMaintenanceCompany
    
    public static void numberOfRepairsForEachRoomPerYear(DBProject esql){
