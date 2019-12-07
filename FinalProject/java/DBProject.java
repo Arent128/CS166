@@ -935,7 +935,12 @@ public class DBProject {
         do {
             System.out.println("Please enter a staff SSN to assign for cleaning");
             try   {
+                System.out.println("Or type cancel if you chose the wrong menu option");
                 userIn_1 = in.readLine();
+                userIn_1 = userIn_1.toLowerCase();
+                if(userIn_1.equals("cancel"))   {
+                    return;
+                }
                 if(esql.isEmpty(userIn_1))   {
                     throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                 }
@@ -1038,7 +1043,12 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Please enter a hotelID");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   userIn_1 = in.readLine();
+                  userIn_1 = userIn_1.toLowerCase();
+                  if(userIn_1.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(userIn_1))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1218,7 +1228,12 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of available rooms");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   userIn_1 = in.readLine();
+                  userIn_1 = userIn_1.toLowerCase();
+                  if(userIn_1.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(userIn_1))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1264,7 +1279,12 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of booked rooms");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   userIn_1 = in.readLine();
+                  userIn_1 = userIn_1.toLowerCase();
+                  if(userIn_1.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(userIn_1))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1311,7 +1331,12 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of available rooms");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   userIn_1 = in.readLine();
+                  userIn_1 = userIn_1.toLowerCase();
+                  if(userIn_1.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(userIn_1))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1377,7 +1402,12 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Please give me a start date");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   startDate = in.readLine();
+                  startDate = startDate.toLowerCase();
+                  if(startDate.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(startDate))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1456,7 +1486,15 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Please enter a customer's first name");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   fName = in.readLine();
+                  String temp = fName.toLowerCase();
+                  if(temp.equals("cancel"))   {
+                    return;
+                  }
+                  if(fName.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(fName))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1547,32 +1585,6 @@ public class DBProject {
       try {
           String hotelID = "", fName = "", lName = "", startDate = "", endDate = "", errorCheck = "";
           int errorResult = 0, textResult = 0;
-        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
-         * Empty
-         * It is a vaild number format for the query (numeric)
-         * That the hotelID is a vaild hotelID*/
-          do   {
-              try   {
-                  System.out.println("Insert a hotelID to get a count of booked rooms");
-                  hotelID = in.readLine();
-                  if(esql.isEmpty(hotelID))   {
-                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
-                  }
-                  if(esql.verifyNumber(hotelID) == false)   {
-                      throw new Exception(String.format("Error a hotelID number must not contain special characters or letters"));
-                  } 
-                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s", hotelID);
-                  errorResult = esql.errorChecker(errorCheck);
-                  if(errorResult == 0)   {
-                      throw new Exception(String.format("Error! %s is not a vaild hotelID", hotelID));
-                  }
-                  break;
-              }
-              catch (Exception e)   {
-                  System.out.println(e.getMessage());
-                  continue;
-              }
-          }while(true);
 
         /*Here we ask for first name to be used. We verify that input is not:
          * Empty
@@ -1582,7 +1594,12 @@ public class DBProject {
           do   {
               try   {
                   System.out.println("Please enter a customer's first name");
+                  System.out.println("Or type cancel if you chose the wrong menu option");
                   fName = in.readLine();
+                  String temp = fName.toLowerCase();
+                  if(temp.equals("cancel"))   {
+                    return;
+                  }
                   if(esql.isEmpty(fName))   {
                       throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
                   }
@@ -1637,6 +1654,34 @@ public class DBProject {
                   continue;
               }
           }while(true);
+
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for the query (numeric)
+         * That the hotelID is a vaild hotelID*/
+          do   {
+              try   {
+                  System.out.println("Insert a hotelID");
+                  hotelID = in.readLine();
+                  if(esql.isEmpty(hotelID))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(hotelID) == false)   {
+                      throw new Exception(String.format("Error a hotelID number must not contain special characters or letters"));
+                  } 
+                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s", hotelID);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! %s is not a vaild hotelID", hotelID));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
 
         /*Here we ask for a start date to be used. We verify that input is not:
          * Empty
