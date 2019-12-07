@@ -1,3 +1,15 @@
+DROP INDEX IF EXISTS hotelIndex; 
+DROP INDEX IF EXISTS staffIndex;
+DROP INDEX IF EXISTS roomIndex;
+DROP INDEX IF EXISTS customerIndex;
+DROP INDEX IF EXISTS maintenanceIndex; 
+DROP INDEX IF EXISTS bookingIndex;
+DROP INDEX IF EXISTS repairIndex;
+DROP INDEX IF EXISTS requestIndex; 
+DROP INDEX IF EXISTS assignedIndex; 
+
+
+
 CREATE INDEX hotelIndex
 ON Hotel
 USING BTREE

@@ -133,6 +133,11 @@ public class DBProject {
       return rowCount;
    }//end executeQuery
 
+/*******************************************************************************
+ ************** START OF FUNCTION DEFINITIONS USED FOR THE PROJECT *************
+ *******************************************************************************/
+
+   /*This function is to verify that information on the table exists. Similar to the excuteQuery, but the console output is removed*/
    public int errorChecker(String query) throws SQLException { 
       // creates a statement object
       Statement stmt = this._connection.createStatement ();
@@ -148,7 +153,7 @@ public class DBProject {
       int numCol = rsmd.getColumnCount ();
       int rowCount = 0;
 
-      // iterates through the result set and output them to standard out.
+      // iterates through the result set
       boolean outputHeader = true;
       while (rs.next()){
 	 if(outputHeader){
@@ -164,6 +169,7 @@ public class DBProject {
       return rowCount;
    }
 
+   /*This function returns the a string from the results of a given query. This is used to extract a single result from the table.*/
    public String getSelectString(String query) throws SQLException  { 
       // creates a statement object
       String result = "";
@@ -194,6 +200,7 @@ public class DBProject {
       return result;
    }
 
+   /*This function executes similarly to executeQuery, however we pass in a int count that will stop the output once K number of rows have been printed*/
    public int executeQueryLimit (String query, int count) throws SQLException {
       // creates a statement object
       Statement stmt = this._connection.createStatement ();
@@ -231,7 +238,8 @@ public class DBProject {
       return rowCount;
    }//end executeQuery
 
-
+   /*This functions verifies a given date by using a created DateFormat. If the there is no error in given date we return true.
+    * Otherwise the format.parse will throw an exception meaning that format of date is not vaild.*/
    public boolean verifyDate(String date)   {
        DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
        format.setLenient(false);
@@ -245,6 +253,8 @@ public class DBProject {
        }
    }
 
+   /*This functions verifies a given input by verifying that this input is a vaild number. This means that we only want those
+    * input values that contain only digits. Anything given that contains letters or special characters will be rejected and will return false*/
    public boolean verifyNumber(String input)    {
        char c = '1';
        for(int i = 0; i < input.length(); i++)   {
@@ -255,6 +265,9 @@ public class DBProject {
        }
        return true;
    }
+   /*We use this function to verify that the given input from the user is not empty.
+    * IF the given input has a length of 0 then it is empty and we return true
+    * Otherwise it is not empty and we return false*/
    public boolean isEmpty(String input)   {
        if(input.length() == 0)   {
            return true;
@@ -262,6 +275,10 @@ public class DBProject {
        return false;
    }
 
+   /*This functions verifies a given input by verifying that input is a vaild entry for text. We do this by checking these conditions
+    * IF the length exceeds 30 then we return 2 to indicate that the issue is input size
+    * IF the input string contains anything other than letters then we return 1 to indicate that it is not vaild
+    * Otherwise we have determined that the given input is vaild and return 0 to indicate that we cleared to use this input.*/
    public int verifyText(String input)   {
        char c = '0';
        if(input.length() > 30)   {
@@ -277,6 +294,9 @@ public class DBProject {
        }
        return 0;
    }
+/*******************************************************************************
+ ************** END OF FUNCTION DEFINITIONS USED IN THE PROJECT ****************
+ *******************************************************************************/
 
    /**
     * Method to close the physical connection if it is open.
@@ -908,6 +928,10 @@ public class DBProject {
         String errorCheck = "";
         String employerID = "";
 
+        /*Here we ask for the Staff SSN to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the staffID chosen is actually vaild and that staff member is acutally works in house cleaning*/
         do {
             System.out.println("Please enter a staff SSN to assign for cleaning");
             try   {
@@ -933,6 +957,11 @@ public class DBProject {
 
         }while(true);
 
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the hotelID given is vaild
+         * That the staff member specified above actually works at that hotel*/
         do {
             try   {
                 System.out.println("Please enter a HotelID to select a hotel");
@@ -948,10 +977,6 @@ public class DBProject {
                 if(errorResult == 0)   {
                     throw new Exception(String.format("Error %s is not a vaild HotelID in the Hotel table, or employee with SSN %s does not work in specified hotel!", userIn_2, userIn_1));
                 }
-                errorResult = esql.errorChecker(errorCheck);
-                if(errorResult == 0)   {
-                    throw new Exception(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_2));
-                }
                 break;
             }
             catch (Exception e)   {
@@ -959,6 +984,12 @@ public class DBProject {
                 continue;
             }
         }while(true);
+
+        /*Here we ask for the roomNo to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the roomNo given is vaild
+         * That the hotel actually has the roomNo that was specified*/
         do   {
             try   {
                 System.out.println("Please enter the room number to be cleaned");
@@ -1000,6 +1031,10 @@ public class DBProject {
           String errorCheck = "";
           int errorResult = 0;
 
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the hotelID given is a vaild hotel*/
           do   {
               try   {
                   System.out.println("Please enter a hotelID");
@@ -1024,6 +1059,10 @@ public class DBProject {
 
           }while(true);
 
+        /*Here we ask for the Staff SSN to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the staffID chosen is actually vaild and that staff member is acutally works in Manager*/
           do   {
               try   {
                   System.out.println("Please enter a Staff SSN");
@@ -1034,10 +1073,10 @@ public class DBProject {
                   if(esql.verifyNumber(userIn_2) == false)   {
                       throw new Exception(String.format("Error a Staff SSN must not contain special characters or letters"));
                   }
-                  errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'Manager';", userIn_2);
+                  errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'Manager' and s.employerID = %s;", userIn_2, userIn_1);
                   errorResult = esql.errorChecker(errorCheck);
                   if(errorResult == 0)   {
-                      throw new Exception(String.format("Error %s is not a vaild employee/this employee's role is not a Manager", userIn_2));
+                      throw new Exception(String.format("Error %s is not a vaild employee/this employee's role is not a Manager, or the Manager specified does not work at this hotel", userIn_2));
                   }
                   break;
               }
@@ -1046,6 +1085,10 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for the roomNo to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the roomNo actually is a vaild roomNo and exists at the hotelID specified earlier*/
           do   {
               try   {
                   System.out.println("Please enter a room number");
@@ -1070,6 +1113,10 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for the repairID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for table (numeric)
+         * That the repairID actually is a vaild repairID from the Repair Table*/
           do   {
               try   {
                   System.out.println("Please enter a repairID");
@@ -1093,6 +1140,10 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for the repair date  to be used. We verify that input is not:
+         * Empty
+         * It is a vaild date format for table (date which is month/day/year)
+         * That the repair date is vaild as well as being the same repairID that was given eariler*/
           do   {
               try   {
                   System.out.println("Please enter a repair date");
@@ -1117,6 +1168,10 @@ public class DBProject {
           }while(true);
 
         int requestVal = (Integer.parseInt(esql.getSelectString("SELECT MAX(reqID) FROM Request")) + 1);
+        
+        /*Here we ask for a brief description to be used. We verify that input is not:
+         * Empty
+         * Does not exceed the length of an entry for text in the request table (which is a char(30))*/
         do   {
             try   {
                 System.out.println("Briefly describe the issue to repair (30 characters or less)");
@@ -1156,6 +1211,10 @@ public class DBProject {
           String errorCheck = "";
           int errorResult = 0;
           
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for the query (numeric)
+         * That the hotelID is a vaild hotelID*/
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of available rooms");
@@ -1191,13 +1250,17 @@ public class DBProject {
    public static void numberOfBookedRooms(DBProject esql){
 	  // Given a hotelID, get the count of rooms booked
       // Your code goes here.
+      /*NOTE THAT THIS QUERY AS REQUESTED ABOVE JUST GETS THE TOTAL COUNT OF BOOKED
+        ROOMS THAT EXIST ON THIS LIST. THEREFORE THE SAME ROOM CAN APPEAR TWICE GIVEN
+        IT WAS BOOKED ON A DIFFERENT DATE*/
       try {
-          /*NOTE THAT THIS QUERY AS REQUESTED ABOVE JUST GETS THE TOTAL COUNT OF BOOKED
-            ROOMS THAT EXIST ON THIS LIST. THEREFORE THE SAME ROOM CAN APPEAR TWICE GIVEN
-            IT WAS BOOKED ON A DIFFERENT DATE*/
           String userIn_1 = "";
           String errorCheck = "";
           int errorResult = 0;
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for the query (numeric)
+         * That the hotelID is a vaild hotelID*/
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of booked rooms");
@@ -1241,6 +1304,10 @@ public class DBProject {
           String userIn_1 = "", userIn_2 = "";
           String errorCheck = "";
           int errorResult = 0;
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for the query (numeric)
+         * That the hotelID is a vaild hotelID*/
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of available rooms");
@@ -1264,6 +1331,9 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for a date to be used. We verify that input is not:
+         * Empty
+         * It is a vaild date format for the query (date being month/day/year)*/
           do   {
               try   {
                   System.out.println("Please enter a date for rooms in that week");
@@ -1301,6 +1371,9 @@ public class DBProject {
       try {
           String userIn = "", startDate = "", endDate = "", errorCheck = "";
           int errorResult = 0;
+        /*Here we ask for a start date to be used. We verify that input is not:
+         * Empty
+         * It is a vaild date format for the query (date being month/day/year)*/
           do   {
               try   {
                   System.out.println("Please give me a start date");
@@ -1319,6 +1392,9 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for a end date to be used. We verify that input is not:
+         * Empty
+         * It is a vaild date format for the query (date being month/day/year)*/
           do   {
               try   {
                   System.out.println("Please give me a endDate date");
@@ -1337,6 +1413,9 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for a value to indicate the number of rows we wish to see for the results. We verify that input is not:
+         * Empty
+         * It is a vaild number (not containing letters and special characters)*/
           do   {
               try   {
                   System.out.println("Please give me a number of rooms to display");
@@ -1369,6 +1448,11 @@ public class DBProject {
       try {
           String fName = "", lName = "", userIn = "", errorCheck = "";
           int errorResult = 0, textResult = 0;
+        /*Here we ask for first name to be used. We verify that input is not:
+         * Empty
+         * Is a vaild first name from the Customer Table
+         * Is formated as a text value (does not include digits or special characters)
+         * Does not exceed the length of an entry for text in the request table (which is a char(30))*/
           do   {
               try   {
                   System.out.println("Please enter a customer's first name");
@@ -1396,6 +1480,11 @@ public class DBProject {
               }
           }while(true);
           
+        /*Here we ask for last name to be used. We verify that input is not:
+         * Empty
+         * Is a vaild last name from the Customer Table
+         * Is formated as a text value (does not include digits or special characters)
+         * Does not exceed the length of an entry for text in the request table (which is a char(30))*/
           do   {
               try   {
                   System.out.println("Please enter a customer's last name");
@@ -1423,6 +1512,9 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for a value to indicate the number of rows we wish to see for the results. We verify that input is not:
+         * Empty
+         * It is a vaild number (not containing letters and special characters)*/
           do   {
               try   {
                   System.out.println("Please give me a number of rooms to display");
@@ -1455,6 +1547,10 @@ public class DBProject {
       try {
           String hotelID = "", fName = "", lName = "", startDate = "", endDate = "", errorCheck = "";
           int errorResult = 0, textResult = 0;
+        /*Here we ask for the Hotel hotelID to be used. We verify that input is not:
+         * Empty
+         * It is a vaild number format for the query (numeric)
+         * That the hotelID is a vaild hotelID*/
           do   {
               try   {
                   System.out.println("Insert a hotelID to get a count of booked rooms");
@@ -1478,6 +1574,11 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for first name to be used. We verify that input is not:
+         * Empty
+         * Is a vaild first name from the Customer Table
+         * Is formated as a text value (does not include digits or special characters)
+         * Does not exceed the length of an entry for text in the request table (which is a char(30))*/
           do   {
               try   {
                   System.out.println("Please enter a customer's first name");
@@ -1505,6 +1606,11 @@ public class DBProject {
               }
           }while(true);
           
+        /*Here we ask for last name to be used. We verify that input is not:
+         * Empty
+         * Is a vaild last name from the Customer Table
+         * Is formated as a text value (does not include digits or special characters)
+         * Does not exceed the length of an entry for text in the request table (which is a char(30))*/
           do   {
               try   {
                   System.out.println("Please enter a customer's last name");
@@ -1532,6 +1638,9 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for a start date to be used. We verify that input is not:
+         * Empty
+         * It is a vaild date format for the query (date being month/day/year)*/
           do   {
               try   {
                   System.out.println("Please give me a start date");
@@ -1550,6 +1659,9 @@ public class DBProject {
               }
           }while(true);
 
+        /*Here we ask for a end date to be used. We verify that input is not:
+         * Empty
+         * It is a vaild date format for the query (date being month/day/year)*/
           do   {
               try   {
                   System.out.println("Please give me a endDate date");
