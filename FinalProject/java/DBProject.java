@@ -906,6 +906,7 @@ public class DBProject {
         String userIn_3 = "";
         int errorResult = 0;
         String errorCheck = "";
+        String employerID = "";
 
         do {
             System.out.println("Please enter a staff SSN to assign for cleaning");
@@ -922,6 +923,7 @@ public class DBProject {
                 if(errorResult == 0)   {
                     throw new Exception(String.format("Error %s is not a vaild employee/this employee's role is not in house cleaning", userIn_1));
                 }
+                employerID = esql.getSelectString(String.format("SELECT s.employerID FROM Staff s WHERE s.SSN = %s", userIn_1));
                 break;
             }
             catch (Exception e)   {
@@ -941,7 +943,11 @@ public class DBProject {
                 if(esql.verifyNumber(userIn_2) == false)   {
                     throw new Exception(String.format("Error! A hotelID cannot contain letters or special characters"));
                 }
-                errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_2);
+                errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s and h.hotelID = %s;", userIn_2, employerID);
+                errorResult = esql.errorChecker(errorCheck);
+                if(errorResult == 0)   {
+                    throw new Exception(String.format("Error %s is not a vaild HotelID in the Hotel table, or employee with SSN %s does not work in specified hotel!", userIn_2, userIn_1));
+                }
                 errorResult = esql.errorChecker(errorCheck);
                 if(errorResult == 0)   {
                     throw new Exception(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_2));
