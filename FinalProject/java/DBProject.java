@@ -21,13 +21,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+/* Includes for the project below */
 import java.util.ArrayList;
 import java.time.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Date;
-
-
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
 /**
  * This class defines a simple embedded SQL utility class that is designed to
  * work with PostgreSQL JDBC drivers.
@@ -154,7 +156,8 @@ public class DBProject {
 	    }
 	    outputHeader = false;
 	 }
-         for (int i=1; i<=numCol; ++i)
+         for (int i=1; i<=numCol; ++i) {
+         }
          ++rowCount;
       }//end while
       stmt.close ();
@@ -191,6 +194,89 @@ public class DBProject {
       return result;
    }
 
+   public int executeQueryLimit (String query, int count) throws SQLException {
+      // creates a statement object
+      Statement stmt = this._connection.createStatement ();
+
+      // issues the query instruction
+      ResultSet rs = stmt.executeQuery (query);
+
+      /*
+       ** obtains the metadata object for the returned result set.  The metadata
+       ** contains row and column info.
+       */
+      ResultSetMetaData rsmd = rs.getMetaData ();
+      int numCol = rsmd.getColumnCount ();
+      int rowCount = 0;
+
+      // iterates through the result set and output them to standard out.
+      boolean outputHeader = true;
+      while (rs.next()){
+	 if(outputHeader){
+	    for(int i = 1; i <= numCol; i++){
+		System.out.print(rsmd.getColumnName(i) + "\t");
+	    }
+	    System.out.println();
+	    outputHeader = false;
+	 }
+         for (int i=1; i<=numCol; ++i)
+            System.out.print (rs.getString (i) + "\t");
+         System.out.println ();
+         ++rowCount;
+         if(count == rowCount)   {
+            break;
+         }
+      }//end while
+      stmt.close ();
+      return rowCount;
+   }//end executeQuery
+
+
+   public boolean verifyDate(String date)   {
+       DateFormat format = new SimpleDateFormat("MM/dd/yyyy");
+       format.setLenient(false);
+       try   {
+           format.parse(date);
+           return true;
+       }
+       catch (ParseException e)   {
+           System.out.println("Error! The given string is an invaild date format.\nThe format of the string should follow month/day/year");
+           return false;
+       }
+   }
+
+   public boolean verifyNumber(String input)    {
+       char c = '1';
+       for(int i = 0; i < input.length(); i++)   {
+           c = input.charAt(i);
+           if(!(Character.isDigit(c)))   {
+               return false;
+           }
+       }
+       return true;
+   }
+   public boolean isEmpty(String input)   {
+       if(input.length() == 0)   {
+           return true;
+       }
+       return false;
+   }
+
+   public int verifyText(String input)   {
+       char c = '0';
+       if(input.length() > 30)   {
+           return 2; 
+       }
+       for(int i = 0; i < input.length(); i++)   {
+           if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))   {
+               continue;
+           }
+           else   {
+               return 1;
+           }
+       }
+       return 0;
+   }
 
    /**
     * Method to close the physical connection if it is open.
@@ -818,36 +904,81 @@ public class DBProject {
         String userIn_1 = "";
         String userIn_2 = "";
         String userIn_3 = "";
-        System.out.println("Please enter a staff SSN to assign for cleaning");
-        userIn_1 = in.readLine();
-        String errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'HouseCleaning';", userIn_1);
-        int errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild employee/this employee's role is not in house cleaning", userIn_1));
-            return;
-        }
-        System.out.println("Please enter a HotelID to select a hotel");
-        userIn_2 = in.readLine();
-        errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_2);
-        errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_2));
-            return;
-        }
-        System.out.println("Please enter the roomNo to be cleaned");
-        userIn_3 = in.readLine();
-        errorCheck = String.format("SELECT r.roomNo FROM Room r, Hotel h WHERE h.hotelID = %s and r.roomNo = %s;", userIn_2, userIn_3);
-        errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild room in given HotelID %s", userIn_3, userIn_2));
-            return;
-        }
-        System.out.println(userIn_1 + " " + userIn_2 + " " + userIn_3);
+        int errorResult = 0;
+        String errorCheck = "";
+
+        do {
+            System.out.println("Please enter a staff SSN to assign for cleaning");
+            try   {
+                userIn_1 = in.readLine();
+                if(esql.isEmpty(userIn_1))   {
+                    throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                }
+                if(esql.verifyNumber(userIn_1) == false)   {
+                    throw new Exception(String.format("Error! A Staff SSN cannot contain letters or special characters"));
+                }
+                errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'HouseCleaning';", userIn_1);
+                errorResult = esql.errorChecker(errorCheck);
+                if(errorResult == 0)   {
+                    throw new Exception(String.format("Error %s is not a vaild employee/this employee's role is not in house cleaning", userIn_1));
+                }
+                break;
+            }
+            catch (Exception e)   {
+               System.out.println(e.getMessage());
+               continue;
+            }
+
+        }while(true);
+
+        do {
+            try   {
+                System.out.println("Please enter a HotelID to select a hotel");
+                userIn_2 = in.readLine();
+                if(esql.isEmpty(userIn_2))   {
+                    throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                }
+                if(esql.verifyNumber(userIn_2) == false)   {
+                    throw new Exception(String.format("Error! A hotelID cannot contain letters or special characters"));
+                }
+                errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_2);
+                errorResult = esql.errorChecker(errorCheck);
+                if(errorResult == 0)   {
+                    throw new Exception(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_2));
+                }
+                break;
+            }
+            catch (Exception e)   {
+                System.out.println(e.getMessage());
+                continue;
+            }
+        }while(true);
+        do   {
+            try   {
+                System.out.println("Please enter the room number to be cleaned");
+                userIn_3 = in.readLine();
+                if(esql.isEmpty(userIn_3))   {
+                    throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                }
+                errorCheck = String.format("SELECT r.roomNo FROM Room r, Hotel h WHERE h.hotelID = %s and r.roomNo = %s;", userIn_2, userIn_3);
+                errorResult = esql.errorChecker(errorCheck);
+                if(esql.verifyNumber(userIn_3) == false)   {
+                    throw new Exception(String.format("Error! A room number cannot contain letters or special characters"));
+                }
+                if(errorResult == 0)   {
+                    throw new Exception(String.format("Error %s is not a vaild room in given HotelID %s", userIn_3, userIn_2));
+                }
+                break;
+            }
+            catch(Exception e)   {
+                continue;
+            }
+        }while(true);
         int assignVal = (Integer.parseInt(esql.getSelectString("SELECT MAX(asgID) FROM Assigned;")) + 1);
 
         String insertStatement = String.format("INSERT INTO Assigned(asgID, staffID, hotelID, roomNo) VALUES(%s, %s, %s, %s)", Integer.toString(assignVal), userIn_1, userIn_2, userIn_3);
         esql.executeUpdate(insertStatement);
-        System.out.println(String.format("StaffID %s was assigned to clean roomNo %s at hotelID %s. The value of the asgID for the job was %s", userIn_1, userIn_3, userIn_2, Integer.toString(assignVal)));
+        System.out.println(String.format("StaffID %s was assigned to clean room number %s at hotelID %s. The value of the asgID for the job was %s", userIn_1, userIn_3, userIn_2, Integer.toString(assignVal)));
 
       }
       catch(Exception e)   {
@@ -859,56 +990,151 @@ public class DBProject {
 	  // Given a hotelID, Staff SSN, roomNo, repairID , date create a repair request in the DB
       // Your code goes here.
       try {
-          String userIn_1 = "", userIn_2 = "", userIn_3 = "", userIn_4 = "", userIn_5 = "";
-          System.out.println("Please enter a hotelID");
-          userIn_1 = in.readLine();
-          System.out.println("Please enter a Staff SSN");
-          userIn_2 = in.readLine();
-          System.out.println("Please enter a roomNo");
-          userIn_3 = in.readLine();
-          System.out.println("Please enter a repairID");
-          userIn_4 = in.readLine();
-          /************************************************
-            NEED TO DO VERIFICATION ON THE DATE
-           *********************************************/
-          System.out.println("Please enter a repair date");
-          userIn_5 = in.readLine();
-        String errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_1);
-        int errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_1));
-            return;
-        }
-        errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'Manager';", userIn_2);
-        errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild employee/this employee's role is not a Manager", userIn_2));
-            return;
-        }
-        errorCheck = String.format("SELECT r.roomNo FROM Room r, Hotel h WHERE h.hotelID = %s and r.roomNo = %s;", userIn_1, userIn_3);
-        errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild room in given HotelID %s", userIn_3, userIn_1));
-            return;
-        }
-        errorCheck = String.format("SELECT rep.rID FROM Repair rep WHERE rep.rID = %s;", userIn_4);
-        errorResult = esql.errorChecker(errorCheck);
-        if(errorResult == 0)   {
-            System.out.println(String.format("Error %s is not a vaild repairID", userIn_4));
-            return;
-        }
-        errorCheck = String.format("SELECT rep.repairDate FROM Repair rep WHERE rep.rID = %s and rep.repairDate = '%s';", userIn_4, userIn_5);
-        errorResult = esql.errorChecker(errorCheck);
-        if(errorResult > 0)   {
-            System.out.println(String.format("Error repairID %s is already scheduled for %s", userIn_4, userIn_5));
-            return;
-        }
+          String userIn_1 = "", userIn_2 = "", userIn_3 = "", userIn_4 = "", userIn_5 = "", issue = "";
+          String errorCheck = "";
+          int errorResult = 0;
+
+          do   {
+              try   {
+                  System.out.println("Please enter a hotelID");
+                  userIn_1 = in.readLine();
+                  if(esql.isEmpty(userIn_1))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s;", userIn_1);
+                  if(esql.verifyNumber(userIn_1) == false)   {
+                      throw new Exception(String.format("Error a hotelID must not contain special characters or letters"));
+                  }
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error %s is not a vaild HotelID in the Hotel table!", userIn_1));
+                  }
+                  break;
+
+              }
+              catch(Exception e)   {
+                  System.out.println(e.getMessage());
+              }
+
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please enter a Staff SSN");
+                  userIn_2 = in.readLine();
+                  if(esql.isEmpty(userIn_2))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn_2) == false)   {
+                      throw new Exception(String.format("Error a Staff SSN must not contain special characters or letters"));
+                  }
+                  errorCheck = String.format("SELECT s.SSN FROM Staff s WHERE s.SSN = %s and s.role = 'Manager';", userIn_2);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error %s is not a vaild employee/this employee's role is not a Manager", userIn_2));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please enter a room number");
+                  userIn_3 = in.readLine();
+                  if(esql.isEmpty(userIn_3))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn_3) == false)   {
+                      throw new Exception(String.format("Error a room number must not contain special characters or letters"));
+                  }
+                  errorCheck = String.format("SELECT r.roomNo FROM Room r, Hotel h WHERE h.hotelID = %s and r.roomNo = %s;", userIn_1, userIn_3);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error %s is not a vaild room in given HotelID %s", userIn_3, userIn_1));
+                  }
+                  break;
+
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please enter a repairID");
+                  userIn_4 = in.readLine();
+                  if(esql.isEmpty(userIn_4))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn_4) == false)   {
+                      throw new Exception(String.format("Error a repairID number must not contain special characters or letters"));
+                  } 
+                  errorCheck = String.format("SELECT rep.rID FROM Repair rep WHERE rep.rID = %s;", userIn_4);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error %s is not a vaild repairID", userIn_4));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please enter a repair date");
+                  userIn_5 = in.readLine();
+                  if(esql.isEmpty(userIn_5))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyDate(userIn_5) == false)   {
+                      throw new Exception("");
+                  }
+                  errorCheck = String.format("SELECT rep.repairDate FROM Repair rep WHERE rep.rID = %s and rep.repairDate = '%s';", userIn_4, userIn_5);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult > 0)   {
+                      throw new Exception(String.format("Error repairID %s is already scheduled for %s", userIn_4, userIn_5));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
         int requestVal = (Integer.parseInt(esql.getSelectString("SELECT MAX(reqID) FROM Request")) + 1);
-        System.out.println("Briefly describe the issue to repair");
-        String issue = in.readLine();
+        do   {
+            try   {
+                System.out.println("Briefly describe the issue to repair (30 characters or less)");
+                issue = in.readLine();
+                  if(esql.isEmpty(issue))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                int textResult = esql.verifyText(issue);
+                if(issue.length() > 30)   {
+                    throw new Exception(String.format("Error! The description you inserted exceeeds the character limit.\nPlease use atmost 30 characters"));
+                }
+                else   {
+                    break;
+                }
+            }
+            catch (Exception e)   {
+                System.out.println(e.getMessage());
+                continue;
+            }
+        }while(true);
+
         String repairRequest = String.format("INSERT INTO Request(reqID, managerID, repairID, requestDate, description) VALUES (%s, %s, %s, '%s'::date, '%s')", Integer.toString(requestVal), userIn_2, userIn_4, userIn_5, issue);
         esql.executeUpdate(repairRequest);
-        System.out.println(String.format("Request for roomNo %s at HotelID %s was created by managerID %s. The repairID %s is scheduled for %s", userIn_3, userIn_1, userIn_2, userIn_4, userIn_5));
+        System.out.println(String.format("Request for roomNo %s at HotelID %s was created by managerID %s. The repairID %s is scheduled for %s and has been assigned a requestID of %s", userIn_3, userIn_1, userIn_2, userIn_4, userIn_5, Integer.toString(requestVal)));
 
       }
       catch (Exception e)   {
@@ -920,6 +1146,36 @@ public class DBProject {
 	  // Given a hotelID, get the count of rooms available 
       // Your code goes here.
       try {
+          String userIn_1 = "";
+          String errorCheck = "";
+          int errorResult = 0;
+          
+          do   {
+              try   {
+                  System.out.println("Insert a hotelID to get a count of available rooms");
+                  userIn_1 = in.readLine();
+                  if(esql.isEmpty(userIn_1))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn_1) == false)   {
+                      throw new Exception(String.format("Error a hotelID number must not contain special characters or letters"));
+                  } 
+                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s", userIn_1);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! %s is not a vaild hotelID", userIn_1));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          String availableRoom = String.format("SELECT notBooked.roomNo, notBooked.hotelID FROM (SELECT r.roomNo, r.hotelID FROM Room r EXCEPT (SELECT b.roomNo, b.hotelID FROM Booking b)) as notBooked WHERE notBooked.hotelID = %s", userIn_1);
+          int rowCount = esql.executeQuery(availableRoom);
+          System.out.println("total rows: " + rowCount);
       }
       catch(Exception e)   {
         System.out.println(e.getMessage());
@@ -930,6 +1186,37 @@ public class DBProject {
 	  // Given a hotelID, get the count of rooms booked
       // Your code goes here.
       try {
+          /*NOTE THAT THIS QUERY AS REQUESTED ABOVE JUST GETS THE TOTAL COUNT OF BOOKED
+            ROOMS THAT EXIST ON THIS LIST. THEREFORE THE SAME ROOM CAN APPEAR TWICE GIVEN
+            IT WAS BOOKED ON A DIFFERENT DATE*/
+          String userIn_1 = "";
+          String errorCheck = "";
+          int errorResult = 0;
+          do   {
+              try   {
+                  System.out.println("Insert a hotelID to get a count of booked rooms");
+                  userIn_1 = in.readLine();
+                  if(esql.isEmpty(userIn_1))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn_1) == false)   {
+                      throw new Exception(String.format("Error a hotelID number must not contain special characters or letters"));
+                  } 
+                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s", userIn_1);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! %s is not a vaild hotelID", userIn_1));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+          String bookedRoom = String.format("SELECT b.roomNo FROM Booking b WHERE b.hotelID = %s", userIn_1);
+          int rowCount = esql.executeQuery(bookedRoom);
+          System.out.println("total rows: " + rowCount);
       }
       catch(Exception e)   {
         System.out.println(e.getMessage());
@@ -939,7 +1226,63 @@ public class DBProject {
    public static void listHotelRoomBookingsForAWeek(DBProject esql){
 	  // Given a hotelID, date - list all the rooms available for a week(including the input date) 
       // Your code goes here.
+      //
+      /*
+       * Given the description above I will list all the available given in a week for a given room. Although the name of the function of the name
+       * would lead me to believe I should display a list of rooms that have been booked for a week.
+       */
       try {
+          String userIn_1 = "", userIn_2 = "";
+          String errorCheck = "";
+          int errorResult = 0;
+          do   {
+              try   {
+                  System.out.println("Insert a hotelID to get a count of available rooms");
+                  userIn_1 = in.readLine();
+                  if(esql.isEmpty(userIn_1))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn_1) == false)   {
+                      throw new Exception(String.format("Error a hotelID number must not contain special characters or letters"));
+                  } 
+                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s", userIn_1);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! %s is not a vaild hotelID", userIn_1));
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please enter a date for rooms in that week");
+                  userIn_2 = in.readLine();
+                  if(esql.isEmpty(userIn_2))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyDate(userIn_2) == false)   {
+                      throw new Exception("");
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+
+          }while(true);
+
+
+          String availableRoom = String.format("SELECT r.roomNo FROM Room r, (SELECT b.hotelID, b.roomNo FROM Booking b WHERE date_trunc('week', b.bookingDate) = date_trunc('week', '%s'::date) and b.hotelID = %s) as booked WHERE r.hotelID = booked.hotelID and r.roomNo != booked.roomNo;", userIn_2, userIn_1);
+          int rowCount = esql.executeQuery(availableRoom);
+          System.out.println("Total rows: " + rowCount);
+
+
       }
       catch(Exception e)   {
         System.out.println(e.getMessage());
@@ -950,6 +1293,64 @@ public class DBProject {
 	  // List Top K Rooms with the highest price for a given date range
       // Your code goes here.
       try {
+          String userIn = "", startDate = "", endDate = "", errorCheck = "";
+          int errorResult = 0;
+          do   {
+              try   {
+                  System.out.println("Please give me a start date");
+                  startDate = in.readLine();
+                  if(esql.isEmpty(startDate))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyDate(startDate) == false)   {
+                      throw new Exception("");
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please give me a endDate date");
+                  endDate = in.readLine();
+                  if(esql.isEmpty(endDate))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyDate(endDate) == false)   {
+                      throw new Exception("");
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please give me a number of rooms to display");
+                  userIn = in.readLine();
+                  if(esql.isEmpty(userIn))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn) == false)   {
+                      throw new Exception(String.format("Please use numbers instead of letters or special characters"));
+                  } 
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+          String query = String.format("SELECT r.roomType, r.roomNo, b.price, b.bookingDate FROM Room r, Booking b WHERE r.roomNo = b.roomNo and r.hotelID = b.hotelID and (b.bookingDate BETWEEN '%s'::date and '%s'::date) ORDER BY b.price DESC;", startDate, endDate);
+          esql.executeQueryLimit(query,Integer.parseInt(userIn));
+
       }
       catch(Exception e)   {
         System.out.println(e.getMessage());
@@ -960,6 +1361,82 @@ public class DBProject {
 	  // Given a customer Name, List Top K highest booking price for a customer 
       // Your code goes here.
       try {
+          String fName = "", lName = "", userIn = "", errorCheck = "";
+          int errorResult = 0, textResult = 0;
+          do   {
+              try   {
+                  System.out.println("Please enter a customer's first name");
+                  fName = in.readLine();
+                  if(esql.isEmpty(fName))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  textResult = esql.verifyText(fName);
+                  if(textResult == 2)  {
+                      throw new Exception("The length of the customer's first name must not exceed 30 characters");
+                  }
+                  else if(textResult == 1)   {
+                      throw new Exception("Error! A customer's first name must not include digits or special characters");
+                  }
+                  errorCheck = String.format("SELECT c.fName FROM Customer c WHERE c.fName = '%s'", fName);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! The customer with first name of %s does not exist in the table of customer", fName));
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+          
+          do   {
+              try   {
+                  System.out.println("Please enter a customer's last name");
+                  lName = in.readLine();
+                  if(esql.isEmpty(lName))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  textResult = esql.verifyText(lName);
+                  if(textResult == 2)  {
+                      throw new Exception("The length of the customer's last name must not exceed 30 characters");
+                  }
+                  else if(textResult == 1)   {
+                      throw new Exception("Error! A customer's last name must not include digits or special characters");
+                  }
+                  errorCheck = String.format("SELECT c.lName FROM Customer c WHERE c.lName = '%s'", lName);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! The customer with last name of %s does not exist in the table of customer", lName));
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please give me a number of rooms to display");
+                  userIn = in.readLine();
+                  if(esql.isEmpty(userIn))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(userIn) == false)   {
+                      throw new Exception(String.format("Please use numbers instead of letters or special characters"));
+                  } 
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          String query = String.format("SELECT c.fName, c.lName, b.price, b.bookingDate, b.hotelID FROM Customer c, Booking b WHERE c.customerID = b.customer and c.fName = '%s' and c.lName = '%s' ORDER BY b.price DESC;", fName, lName);
+          esql.executeQueryLimit(query, Integer.parseInt(userIn));
       }
       catch(Exception e)   {
         System.out.println(e.getMessage());
@@ -970,6 +1447,124 @@ public class DBProject {
 	  // Given a hotelID, customer Name and date range get the total cost incurred by the customer
       // Your code goes here.
       try {
+          String hotelID = "", fName = "", lName = "", startDate = "", endDate = "", errorCheck = "";
+          int errorResult = 0, textResult = 0;
+          do   {
+              try   {
+                  System.out.println("Insert a hotelID to get a count of booked rooms");
+                  hotelID = in.readLine();
+                  if(esql.isEmpty(hotelID))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyNumber(hotelID) == false)   {
+                      throw new Exception(String.format("Error a hotelID number must not contain special characters or letters"));
+                  } 
+                  errorCheck = String.format("SELECT h.hotelID FROM Hotel h WHERE h.hotelID = %s", hotelID);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! %s is not a vaild hotelID", hotelID));
+                  }
+                  break;
+              }
+              catch (Exception e)   {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please enter a customer's first name");
+                  fName = in.readLine();
+                  if(esql.isEmpty(fName))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  textResult = esql.verifyText(fName);
+                  if(textResult == 2)  {
+                      throw new Exception("The length of the customer's first name must not exceed 30 characters");
+                  }
+                  else if(textResult == 1)   {
+                      throw new Exception("Error! A customer's first name must not include digits or special characters");
+                  }
+                  errorCheck = String.format("SELECT c.fName FROM Customer c WHERE c.fName = '%s'", fName);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! The customer with first name of %s does not exist in the table of customer", fName));
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+          
+          do   {
+              try   {
+                  System.out.println("Please enter a customer's last name");
+                  lName = in.readLine();
+                  if(esql.isEmpty(lName))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  textResult = esql.verifyText(lName);
+                  if(textResult == 2)  {
+                      throw new Exception("The length of the customer's last name must not exceed 30 characters");
+                  }
+                  else if(textResult == 1)   {
+                      throw new Exception("Error! A customer's last name must not include digits or special characters");
+                  }
+                  errorCheck = String.format("SELECT c.lName FROM Customer c WHERE c.lName = '%s'", lName);
+                  errorResult = esql.errorChecker(errorCheck);
+                  if(errorResult == 0)   {
+                      throw new Exception(String.format("Error! The customer with last name of %s does not exist in the table of customer", lName));
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please give me a start date");
+                  startDate = in.readLine();
+                  if(esql.isEmpty(startDate))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyDate(startDate) == false)   {
+                      throw new Exception("");
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          do   {
+              try   {
+                  System.out.println("Please give me a endDate date");
+                  endDate = in.readLine();
+                  if(esql.isEmpty(endDate))   {
+                      throw new Exception("Error! Empty input detected. Please enter input before hitting enter");
+                  }
+                  if(esql.verifyDate(endDate) == false)   {
+                      throw new Exception("");
+                  }
+                  break;
+              }
+              catch (Exception e)    {
+                  System.out.println(e.getMessage());
+                  continue;
+              }
+          }while(true);
+
+          String query = String.format("SELECT c.fName, c.lName, SUM(b.price) FROM Customer c, Booking b WHERE c.customerID = b.customer and b.hotelID = %s and  c.fName = '%s' and c.lName = '%s' and (b.bookingDate BETWEEN '%s'::date and '%s'::date) GROUP BY c.fName, c.lName;", hotelID, fName, lName, startDate, endDate);
+          esql.executeQuery(query);
+
       }
       catch(Exception e)   {
         System.out.println(e.getMessage());
