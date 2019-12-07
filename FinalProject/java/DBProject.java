@@ -431,9 +431,12 @@ public class DBProject {
        ArrayList<String> custData = new ArrayList<String>();
        String inFirst;
        do { //Ask for first name
-           System.out.print("Please enter customer's first name (Max 30 characters): ");
+           System.out.print("Please enter customer's first name (Max 30 characters) or type \'CANCEL\' to return to main menu: ");
            try {
                inFirst = in.readLine();
+		if(inFirst.equals("CANCEL")) {
+			return;
+		}
                if(inFirst.length() > 30) {
                 System.out.print ("Error, Over character limit.");
                 continue;
@@ -535,10 +538,12 @@ public class DBProject {
        ArrayList<String> roomData = new ArrayList<String>();
        String inHotel;
        do { //Ask for hotel ID. Assuming that the Hotel ID is information available to who would be using this.
-           System.out.print("Please enter Hotel ID: ");
+           System.out.print("Please enter Hotel ID or type \'CANCEL\' to return to main menu: ");
            try {
                inHotel = in.readLine();
-
+		if(inHotel.equals("CANCEL")) {
+			return;
+		}
        	       int checkHotel = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inHotel + "\';");
        		if (checkHotel < 1) {
          		System.out.println("Error: Hotel ID not found in database");
@@ -607,9 +612,12 @@ public class DBProject {
       ArrayList<String> matData = new ArrayList<String>();
       String incmpID;
       do { //Ask for company ID. Assuming that the company ID is information available to who would be using this.
-           System.out.print("Please enter Company ID: ");
+           System.out.print("Please enter Company ID or type \'CANCEL\' to return to main menu: ");
            try {
                incmpID = in.readLine();
+		if(incmpID.equals("CANCEL")) {
+			return;	
+		}
 	       //Check for uniqueness in database. If the query has any rows there must be something with the same hotelId and roomno.
 	       int check = esql.errorChecker("SELECT * FROM MaintenanceCompany M WHERE M.cmpID = \'" + incmpID + "\';");
 	       if(check != 0) {
@@ -697,9 +705,12 @@ public class DBProject {
 
       String inhID;
       do { //Ask for hotel ID. Assuming that the hotel ID is information available to who would be using this.
-           System.out.print("Please enter Hotel ID: ");
+           System.out.print("Please enter Hotel ID or type \'CANCEL\' to return to main menu: ");
            try {
                inhID = in.readLine();
+		if(inhID.equals("CANCEL")) {
+			return;
+		}
                int check = esql.errorChecker("SELECT * FROM Hotel H WHERE H.hotelID = \'" + inhID + "\';");
                if(check < 1) { //Make sure the hotel exists
                   System.out.println("Error: hotel ID not found.");
@@ -811,9 +822,12 @@ public class DBProject {
 
     String incID;
     do { //Ask for customer ID. Assuming that the customer ID is information available to who would be using this.
-          System.out.print("Please enter Customer ID: ");
+          System.out.print("Please enter Customer ID or type \'CANCEL\' to return to main menu: ");
           try {
               incID = in.readLine();
+	      if(incID.equals("CANCEL")) {
+		return;
+		}
               int check = esql.errorChecker("SELECT * FROM Customer C WHERE C.customerID = \'" + incID + "\';");
               if(check < 1) { //Make sure the customer exists
                 System.out.println("Error: customer ID not found.");
@@ -1694,8 +1708,11 @@ public class DBProject {
 	  String input;
 	  do {
 		  try {
-			  System.out.print("Enter name of Maintenance Company: ");
+			  System.out.print("Enter name of Maintenance Company or type \'CANCEL\' to return to main menu: ");
 			  input = in.readLine();
+			  if(input.equals("CANCEL")) {
+				return;
+			}
 			  break;
 		  }
 		  catch(Exception e)   {
@@ -1715,11 +1732,16 @@ public class DBProject {
    public static void topKMaintenanceCompany(DBProject esql){
 	  // List Top K Maintenance Company Names based on total repair count (descending order)
       // Your code goes here.
+	  String input2;
 	  int input;
 	  do {
 		  try {
-			  System.out.print("Enter number of Maintenance Companies you would like to see: ");
-			  input = Integer.parseInt(in.readLine());
+			  System.out.print("Enter number of Maintenance Companies you would like to see or type \'CANCEL\' to return to main menu: ");
+			  input2 = in.readLine();
+			  if(input2.equals("CANCEL")) {
+				return;
+			  }
+			  input = Integer.parseInt(input2);	  
 			  break;
 		  }
 		  catch(Exception e)   {
@@ -1741,8 +1763,11 @@ public class DBProject {
 	  String inHotel;
 	  do {
 		  try {
-			  System.out.print("Enter hotel id: ");
+			  System.out.print("Enter hotel id or type \'CANCEL\' to return to main menu: ");
 			  inHotel = in.readLine();
+			  if(inHotel.equals("CANCEL")) {
+				return;
+			  }
 			  int checkHotel = esql.errorChecker("SELECT * FROM Hotel h WHERE h.hotelID = " + inHotel + ";");
 			  if(checkHotel < 1) {
 				System.out.println("Error: Hotel not found");
